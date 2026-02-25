@@ -20,7 +20,7 @@ img3 = img_to_base64("foto3.jpg")
 img4 = img_to_base64("foto4.jpg")
 
 # ===================================
-# STICKMAN UI (TIDAK DIUBAH)
+# STICKMAN UI
 # ===================================
 st.markdown(f"""
 <style>
@@ -33,11 +33,6 @@ box-shadow:0 6px 25px rgba(0,0,0,0.06);margin-bottom:25px;}}
 top:0;left:25px;border:4px solid white;object-fit:cover;}}
 .body{{position:absolute;top:90px;left:68px;width:4px;height:80px;background:black;}}
 .pelvis{{position:absolute;top:165px;left:45px;width:50px;height:4px;background:black;}}
-.arm-left,.arm-right,.leg-left,.leg-right{{position:absolute;width:70px;height:4px;background:black;}}
-.arm-left{{top:110px;left:-5px;}}
-.arm-right{{top:110px;left:75px;}}
-.leg-left{{top:180px;left:10px;}}
-.leg-right{{top:180px;left:60px;}}
 </style>
 
 <div class="navbar"><h3>🎮 Stickman Interactive Mode — Portal Data Sekolah</h3></div>
@@ -54,12 +49,11 @@ top:0;left:25px;border:4px solid white;object-fit:cover;}}
 # INPUT
 # ===================================
 st.markdown("### 🔎 Pencarian")
-
 sheet_url = st.text_input("Masukkan Link Spreadsheet")
 npsn = st.text_input("Masukkan NPSN")
 
 # ===================================
-# AUTO FORMAT DETECTOR (NO PRIORITY)
+# AUTO FORMAT DETECTOR ENGINE
 # ===================================
 @st.cache_data(show_spinner=False)
 def load_all_sheets(url):
@@ -68,30 +62,28 @@ def load_all_sheets(url):
         url = url.replace("/edit?usp=sharing","/export?format=xlsx")
 
     excel = pd.ExcelFile(url)
-    semua_data = []
+    semua_data=[]
 
     def auto_read(sheet_name):
 
         raw = pd.read_excel(excel, sheet_name=sheet_name, header=None)
 
         header_row=None
-
-        # cari baris header yg ada kata npsn
         for i in range(min(15,len(raw))):
-            row_values = raw.iloc[i].astype(str).str.lower().tolist()
+            row_values=raw.iloc[i].astype(str).str.lower().tolist()
             if any("npsn" in v for v in row_values):
                 header_row=i
                 break
 
-        if header_row is not None:
-            df=raw.iloc[header_row+1:].copy()
-            df.columns=(raw.iloc[header_row]
-                        .astype(str)
-                        .str.lower()
-                        .str.strip()
-                        .str.replace(" ","_"))
-        else:
+        if header_row is None:
             return None
+
+        df=raw.iloc[header_row+1:].copy()
+        df.columns=(raw.iloc[header_row]
+                    .astype(str)
+                    .str.lower()
+                    .str.strip()
+                    .str.replace(" ","_"))
 
         # auto rename kolom npsn
         for c in df.columns:
@@ -99,12 +91,15 @@ def load_all_sheets(url):
                 df=df.rename(columns={c:"npsn"})
                 break
 
+        if "npsn" not in df.columns:
+            return None
+
         df["source_sheet"]=sheet_name
         return df.reset_index(drop=True)
 
     for sheet in excel.sheet_names:
-        hasil = auto_read(sheet)
-        if hasil is not None and "npsn" in hasil.columns:
+        hasil=auto_read(sheet)
+        if hasil is not None:
             semua_data.append(hasil)
 
     if semua_data:
@@ -113,7 +108,7 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # ===================================
-# RESULT
+# RESULT + GROUP INSTALASI MODE
 # ===================================
 if sheet_url:
 
@@ -124,10 +119,33 @@ if sheet_url:
 
     if npsn:
 
-        hasil = data[data["npsn"].astype(str).str.strip()==str(npsn).strip()]
+        # ===== AUTO GROUP DETECTOR =====
+        base_npsn = str(npsn).strip().split("_")[0]
+
+        hasil = data[
+            data["npsn"]
+            .astype(str)
+            .str.strip()
+            .str.startswith(base_npsn)
+        ]
 
         if len(hasil)>0:
-            st.success("🟢 DATA DITEMUKAN — AUTO DETECTOR MODE")
-            st.dataframe(hasil,use_container_width=True,hide_index=True)
+
+            st.success("🟢 DATA DITEMUKAN — GROUP INSTALASI MODE")
+
+            # buat kolom grup
+            hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
+
+            # tampilkan per grup
+            for grp, df_grp in hasil.groupby("group"):
+
+                st.markdown(f"## 🏫 SEKOLAH NPSN {grp} ({len(df_grp)} Instalasi)")
+
+                st.dataframe(
+                    df_grp.drop(columns=["group"]),
+                    use_container_width=True,
+                    hide_index=True
+                )
+
         else:
             st.warning("Data tidak ditemukan")
