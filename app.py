@@ -8,22 +8,45 @@ import base64
 st.set_page_config(page_title="Portal NPSN - Stickman Interactive", layout="wide")
 
 # ===================================
-# AUTO FULL WIDTH CSS ENGINE
+# ZERO SCROLL DASHBOARD CSS
 # ===================================
 st.markdown("""
 <style>
-/* dataframe full width auto */
-div[data-testid="stDataFrame"] div[role="table"]{
-    width:max-content !important;
-    font-size:13px;
+
+.dashboard-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
 }
 
-/* kalau kolom banyak → font lebih kecil */
-@media (min-width:1200px){
-    div[data-testid="stDataFrame"] table{
-        font-size:12px !important;
-    }
+.dashboard-table th{
+    background:#f1f5f9;
+    padding:8px;
+    text-align:left;
+    border-bottom:1px solid #e5e7eb;
+    white-space:normal !important;
 }
+
+.dashboard-table td{
+    padding:8px;
+    border-bottom:1px solid #eef2f7;
+    vertical-align:top;
+    word-wrap:break-word;
+    white-space:normal !important;
+    max-width:240px;
+}
+
+.dashboard-card{
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.06);
+    margin-bottom:20px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -45,7 +68,7 @@ img4 = img_to_base64("foto4.jpg")
 st.markdown(f"""
 <style>
 .stApp{{background:#f4f7fb;}}
-.navbar{{background:white;padding:18px 25px;border-radius:14px;
+.navbar{{background:white;padding:18px;border-radius:14px;
 box-shadow:0 6px 25px rgba(0,0,0,0.06);margin-bottom:25px;}}
 .fight-area{{display:flex;justify-content:center;gap:100px;}}
 .stickman{{position:relative;width:140px;height:260px;}}
@@ -73,7 +96,7 @@ sheet_url = st.text_input("Masukkan Link Spreadsheet")
 npsn = st.text_input("Masukkan NPSN")
 
 # ===================================
-# AUTO FORMAT DETECTOR ENGINE
+# AUTO FORMAT DETECTOR
 # ===================================
 @st.cache_data(show_spinner=False)
 def load_all_sheets(url):
@@ -105,7 +128,6 @@ def load_all_sheets(url):
                     .str.strip()
                     .str.replace(" ","_"))
 
-        # auto rename kolom npsn
         for c in df.columns:
             if "npsn" in c:
                 df=df.rename(columns={c:"npsn"})
@@ -126,6 +148,29 @@ def load_all_sheets(url):
         return pd.concat(semua_data, ignore_index=True)
 
     return pd.DataFrame()
+
+# ===================================
+# ZERO SCROLL TABLE RENDER
+# ===================================
+def render_dashboard_table(df):
+
+    html = '<div class="dashboard-card"><table class="dashboard-table">'
+    html += "<thead><tr>"
+
+    for col in df.columns:
+        html += f"<th>{col}</th>"
+
+    html += "</tr></thead><tbody>"
+
+    for _, row in df.iterrows():
+        html += "<tr>"
+        for val in row:
+            html += f"<td>{val}</td>"
+        html += "</tr>"
+
+    html += "</tbody></table></div>"
+
+    st.markdown(html, unsafe_allow_html=True)
 
 # ===================================
 # RESULT + GROUP INSTALASI MODE
@@ -150,7 +195,7 @@ if sheet_url:
 
         if len(hasil)>0:
 
-            st.success("🟢 DATA DITEMUKAN — AUTO FULL WIDTH MODE")
+            st.success("🟢 ZERO SCROLL DASHBOARD MODE AKTIF")
 
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
@@ -158,9 +203,8 @@ if sheet_url:
 
                 st.markdown(f"## 🏫 SEKOLAH NPSN {grp} ({len(df_grp)} Instalasi)")
 
-                st.dataframe(
-                    df_grp.drop(columns=["group"]),
-                    hide_index=True
+                render_dashboard_table(
+                    df_grp.drop(columns=["group"])
                 )
 
         else:
