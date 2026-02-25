@@ -8,6 +8,26 @@ import base64
 st.set_page_config(page_title="Portal NPSN - Stickman Interactive", layout="wide")
 
 # ===================================
+# AUTO FULL WIDTH CSS ENGINE
+# ===================================
+st.markdown("""
+<style>
+/* dataframe full width auto */
+div[data-testid="stDataFrame"] div[role="table"]{
+    width:max-content !important;
+    font-size:13px;
+}
+
+/* kalau kolom banyak → font lebih kecil */
+@media (min-width:1200px){
+    div[data-testid="stDataFrame"] table{
+        font-size:12px !important;
+    }
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ===================================
 # LOAD FOTO
 # ===================================
 def img_to_base64(path):
@@ -119,7 +139,6 @@ if sheet_url:
 
     if npsn:
 
-        # ===== AUTO GROUP DETECTOR =====
         base_npsn = str(npsn).strip().split("_")[0]
 
         hasil = data[
@@ -131,19 +150,16 @@ if sheet_url:
 
         if len(hasil)>0:
 
-            st.success("🟢 DATA DITEMUKAN — GROUP INSTALASI MODE")
+            st.success("🟢 DATA DITEMUKAN — AUTO FULL WIDTH MODE")
 
-            # buat kolom grup
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
-            # tampilkan per grup
             for grp, df_grp in hasil.groupby("group"):
 
                 st.markdown(f"## 🏫 SEKOLAH NPSN {grp} ({len(df_grp)} Instalasi)")
 
                 st.dataframe(
                     df_grp.drop(columns=["group"]),
-                    use_container_width=True,
                     hide_index=True
                 )
 
