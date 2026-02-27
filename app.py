@@ -10,60 +10,50 @@ st.set_page_config(
 )
 
 # ===================================
-# CLEAN ENTERPRISE STYLE
+# ENTERPRISE STYLE + MINI PLAYER SAFE MODE
 # ===================================
 st.markdown("""
 <style>
 
-.stApp {
+.stApp{
     background:#f4f6f9;
 }
 
-/* Header */
+/* HEADER */
 .header-box{
     background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 3px 12px rgba(0,0,0,0.06);
+    padding:18px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
     margin-bottom:20px;
 }
 
-/* Sidebar cleaner */
-section[data-testid="stSidebar"] {
-    background:#111827;
-}
-section[data-testid="stSidebar"] * {
-    color:white !important;
-}
-
-/* CLEAN TABLE MODE */
-div[data-testid="stDataFrame"] table {
-    width:100% !important;
-    table-layout:auto !important;
-    font-size:13px !important;
+/* STAT CARD */
+.stat-card{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    text-align:center;
 }
 
-div[data-testid="stDataFrame"] th {
-    background-color:#f1f5f9 !important;
-    color:#111 !important;
-    font-weight:600 !important;
-    white-space:nowrap !important;
+/* TABLE FIT */
+table {
+    width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
 }
 
-div[data-testid="stDataFrame"] td {
-    white-space:normal !important;
-    word-wrap:break-word !important;
-    padding:6px !important;
+th, td {
+    padding: 8px !important;
+    text-align: left !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    font-size: 14px !important;
 }
 
-/* Remove weird borders */
-div[data-testid="stDataFrame"] {
-    border-radius:12px;
-    overflow:hidden;
-    box-shadow:0 4px 12px rgba(0,0,0,0.05);
-}
+/* ================= MINI PLAYER ================= */
 
-/* MINI PLAYER */
 #mini-player {
     position: fixed;
     bottom: 20px;
@@ -121,7 +111,7 @@ div[data-testid="stDataFrame"] {
 with st.sidebar:
     st.title("📊 Portal Sekolah")
     st.write("Dashboard Data Sekolah")
-    st.caption("Clean Column Enterprise Mode")
+    st.caption("Enterprise + Mini Player Mode")
 
 # ===================================
 # HEADER
@@ -134,7 +124,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ===================================
-# INPUT AREA
+# INPUT
 # ===================================
 colA, colB = st.columns(2)
 
@@ -148,7 +138,7 @@ st.markdown("### 🎬 Media Player")
 media_link = st.text_input("Masukkan Link YouTube / Playlist")
 
 # ===================================
-# MINI PLAYER SAFE MODE
+# MINI PLAYER SAFE ENGINE
 # ===================================
 if media_link:
 
@@ -182,7 +172,9 @@ if media_link:
             </iframe>
         </div>
 
-        <div id="mini-circle" onclick="expandPlayer()">▶</div>
+        <div id="mini-circle" onclick="expandPlayer()">
+            ▶
+        </div>
 
         <script>
         dragElement(document.getElementById("mini-player"));
@@ -247,6 +239,7 @@ def load_all_sheets(url):
     semua_data=[]
 
     def auto_read(sheet_name):
+
         raw = pd.read_excel(excel, sheet_name=sheet_name, header=None)
 
         header_row=None
@@ -288,7 +281,7 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # ===================================
-# SEARCH RESULT (TIDAK DIUBAH)
+# DATA LOAD
 # ===================================
 if sheet_url:
 
@@ -313,10 +306,8 @@ if sheet_url:
 
                 st.markdown(f"### 🏫 Sekolah NPSN {grp} ({len(df_grp)} Instalasi)")
 
-                st.dataframe(
-                    df_grp.drop(columns=["group"]),
-                    use_container_width=True,
-                    hide_index=True
+                st.table(
+                    df_grp.drop(columns=["group"])
                 )
 
         else:
