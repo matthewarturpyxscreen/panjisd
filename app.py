@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
 # =========================================
-# STYLE IMPROVED
+# STYLE ENTERPRISE
 # =========================================
 st.markdown("""
 <style>
@@ -41,7 +41,7 @@ st.markdown("""
     padding:15px;
     border-radius:8px;
     margin-bottom:15px;
-    font-weight:500;
+    font-weight:600;
 }
 
 /* RESULT CARD */
@@ -53,7 +53,7 @@ st.markdown("""
     margin-bottom:20px;
 }
 
-/* TABLE CLEAN */
+/* TABLE FIT */
 table {
     width:100% !important;
     table-layout:fixed !important;
@@ -69,13 +69,16 @@ td, th {
 """, unsafe_allow_html=True)
 
 # =========================================
-# SIDEBAR MEDIA PLAYER (TIDAK DIUBAH)
+# SIDEBAR MEDIA PLAYER
 # =========================================
 with st.sidebar:
+
     st.title("🎬 Media Player")
+
     media_link = st.text_input("Masukkan Link YouTube / Playlist")
 
     if media_link:
+
         embed_url = None
 
         if "list=" in media_link:
@@ -91,7 +94,10 @@ with st.sidebar:
             embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
 
         if embed_url:
-            st.components.v1.iframe(embed_url, height=250, scrolling=False)
+            st.components.v1.iframe(embed_url, height=250)
+
+    st.markdown("---")
+    st.caption("Mendukung playlist & auto next")
 
 # =========================================
 # HEADER
@@ -104,7 +110,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================
-# INPUT AREA DENGAN BUTTON SEARCH
+# INPUT AREA
 # =========================================
 colA, colB, colC = st.columns([3,2,1])
 
@@ -172,12 +178,28 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # =========================================
-# SEARCH LOGIC (TIDAK MENGUBAH FUNGSI)
+# SEARCH LOGIC
 # =========================================
 if sheet_url:
 
     data = load_all_sheets(sheet_url)
 
+    # STAT CARD
+    col1,col2,col3 = st.columns(3)
+
+    with col1:
+        st.markdown(f'<div class="stat-card"><h3>{len(data)}</h3><p>Total Baris Data</p></div>',unsafe_allow_html=True)
+
+    with col2:
+        total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
+        st.markdown(f'<div class="stat-card"><h3>{total_sekolah}</h3><p>Total Sekolah</p></div>',unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f'<div class="stat-card"><h3>{data["source_sheet"].nunique()}</h3><p>Total Sheet</p></div>',unsafe_allow_html=True)
+
+    # =========================================
+    # KLIK SEARCH
+    # =========================================
     if search_btn and npsn_input:
 
         base_npsn = str(npsn_input).strip().split("_")[0]
@@ -190,13 +212,25 @@ if sheet_url:
         ]
 
         if len(hasil)>0:
+            st.session_state.search_success = True
+            st.session_state.search_result = hasil
+        else:
+            st.session_state.search_success = False
+            st.session_state.search_result = None
 
-            # SUCCESS POPUP
-            st.markdown(
-                '<div class="success-box">✅ Data berhasil ditemukan</div>',
-                unsafe_allow_html=True
-            )
+        # AUTO CLEAR INPUT
+        st.session_state.npsn_box = ""
 
+    # =========================================
+    # TAMPILKAN HASIL
+    # =========================================
+    if "search_success" in st.session_state:
+
+        if st.session_state.search_success:
+
+            st.markdown('<div class="success-box">✅ Data berhasil ditemukan</div>', unsafe_allow_html=True)
+
+            hasil = st.session_state.search_result
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
             for grp, df_grp in hasil.groupby("group"):
@@ -204,13 +238,8 @@ if sheet_url:
                 st.markdown(f"### 🏫 Sekolah NPSN {grp} ({len(df_grp)} Instalasi)")
 
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
-
                 st.table(df_grp.drop(columns=["group"]))
-
                 st.markdown('</div>', unsafe_allow_html=True)
 
         else:
             st.warning("Data tidak ditemukan")
-
-        # AUTO CLEAR INPUT
-        st.session_state.npsn_box = ""
