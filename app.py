@@ -1,104 +1,79 @@
 import streamlit as st
 import pandas as pd
-import base64
 
 # ===================================
-# CONFIG
+# CONFIG ENTERPRISE DASHBOARD
 # ===================================
-st.set_page_config(page_title="Portal NPSN - Stickman Interactive", layout="wide")
+st.set_page_config(
+    page_title="Portal Data Sekolah",
+    layout="wide"
+)
 
 # ===================================
-# ZERO SCROLL DASHBOARD CSS
+# STYLE ENTERPRISE
 # ===================================
 st.markdown("""
 <style>
 
-.dashboard-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:14px;
+.stApp{
+    background:#f4f6f9;
+}
+
+.header-box{
     background:white;
+    padding:18px;
     border-radius:10px;
-    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom:20px;
 }
 
-.dashboard-table th{
-    background:#f1f5f9;
-    padding:8px;
-    text-align:left;
-    border-bottom:1px solid #e5e7eb;
-    white-space:normal !important;
-}
-
-.dashboard-table td{
-    padding:8px;
-    border-bottom:1px solid #eef2f7;
-    vertical-align:top;
-    word-wrap:break-word;
-    white-space:normal !important;
-    max-width:240px;
-}
-
-.dashboard-card{
+.stat-card{
     background:white;
     padding:15px;
-    border-radius:12px;
-    box-shadow:0 4px 14px rgba(0,0,0,0.06);
-    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    text-align:center;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ===================================
-# LOAD FOTO
+# SIDEBAR (TAMPILAN ENTERPRISE)
 # ===================================
-def img_to_base64(path):
-    with open(path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
-
-img1 = img_to_base64("foto1.jpg")
-img2 = img_to_base64("foto2.jpg")
-img3 = img_to_base64("foto3.jpg")
-img4 = img_to_base64("foto4.jpg")
+with st.sidebar:
+    st.title("📊 Portal Sekolah")
+    st.markdown("---")
+    st.write("Dashboard Data Sekolah")
+    st.write("Pencarian berdasarkan NPSN")
+    st.markdown("---")
+    st.caption("Enterprise Dashboard Mode")
 
 # ===================================
-# STICKMAN UI
+# HEADER
 # ===================================
-st.markdown(f"""
-<style>
-.stApp{{background:#f4f7fb;}}
-.navbar{{background:white;padding:18px;border-radius:14px;
-box-shadow:0 6px 25px rgba(0,0,0,0.06);margin-bottom:25px;}}
-.fight-area{{display:flex;justify-content:center;gap:100px;}}
-.stickman{{position:relative;width:140px;height:260px;}}
-.head{{width:90px;height:90px;border-radius:50%;position:absolute;
-top:0;left:25px;border:4px solid white;object-fit:cover;}}
-.body{{position:absolute;top:90px;left:68px;width:4px;height:80px;background:black;}}
-.pelvis{{position:absolute;top:165px;left:45px;width:50px;height:4px;background:black;}}
-</style>
-
-<div class="navbar"><h3>🎮 Stickman Interactive Mode — Portal Data Sekolah</h3></div>
-
-<div class="fight-area">
-<div class="stickman"><img src="data:image/jpeg;base64,{img1}" class="head"><div class="body"></div><div class="pelvis"></div></div>
-<div class="stickman"><img src="data:image/jpeg;base64,{img2}" class="head"><div class="body"></div><div class="pelvis"></div></div>
-<div class="stickman"><img src="data:image/jpeg;base64,{img3}" class="head"><div class="body"></div><div class="pelvis"></div></div>
-<div class="stickman"><img src="data:image/jpeg;base64,{img4}" class="head"><div class="body"></div><div class="pelvis"></div></div>
+st.markdown("""
+<div class="header-box">
+<h2>Dashboard Data Sekolah</h2>
+<p>Sistem pencarian instalasi sekolah berbasis NPSN</p>
 </div>
 """, unsafe_allow_html=True)
 
 # ===================================
-# INPUT
+# INPUT AREA
 # ===================================
-st.markdown("### 🔎 Pencarian")
-sheet_url = st.text_input("Masukkan Link Spreadsheet")
-npsn = st.text_input("Masukkan NPSN")
+colA, colB = st.columns(2)
+
+with colA:
+    sheet_url = st.text_input("Link Spreadsheet")
+
+with colB:
+    npsn = st.text_input("Cari NPSN")
 
 # ===================================
-# AUTO FORMAT DETECTOR
+# AUTO FORMAT DETECTOR (TIDAK DIUBAH)
 # ===================================
-@st.cache_data(show_spinner=False)
+@st.cache_resource
 def load_all_sheets(url):
 
     if "docs.google.com" in url:
@@ -150,38 +125,30 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # ===================================
-# ZERO SCROLL TABLE RENDER
-# ===================================
-def render_dashboard_table(df):
-
-    html = '<div class="dashboard-card"><table class="dashboard-table">'
-    html += "<thead><tr>"
-
-    for col in df.columns:
-        html += f"<th>{col}</th>"
-
-    html += "</tr></thead><tbody>"
-
-    for _, row in df.iterrows():
-        html += "<tr>"
-        for val in row:
-            html += f"<td>{val}</td>"
-        html += "</tr>"
-
-    html += "</tbody></table></div>"
-
-    st.markdown(html, unsafe_allow_html=True)
-
-# ===================================
-# RESULT + GROUP INSTALASI MODE
+# LOAD DATA GLOBAL (TURBO ENGINE)
 # ===================================
 if sheet_url:
 
-    if "all_data" not in st.session_state:
-        st.session_state.all_data = load_all_sheets(sheet_url)
+    data = load_all_sheets(sheet_url)
 
-    data = st.session_state.all_data
+    # ===================================
+    # STAT CARD ENTERPRISE (TIDAK MENGUBAH FUNGSI)
+    # ===================================
+    col1,col2,col3 = st.columns(3)
 
+    with col1:
+        st.markdown(f'<div class="stat-card"><h3>{len(data)}</h3><p>Total Baris Data</p></div>',unsafe_allow_html=True)
+
+    with col2:
+        total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
+        st.markdown(f'<div class="stat-card"><h3>{total_sekolah}</h3><p>Total Sekolah</p></div>',unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f'<div class="stat-card"><h3>{data["source_sheet"].nunique()}</h3><p>Total Sheet</p></div>',unsafe_allow_html=True)
+
+    # ===================================
+    # SEARCH RESULT (FUNGSI ASLI TETAP)
+    # ===================================
     if npsn:
 
         base_npsn = str(npsn).strip().split("_")[0]
@@ -195,16 +162,16 @@ if sheet_url:
 
         if len(hasil)>0:
 
-            st.success("🟢 ZERO SCROLL DASHBOARD MODE AKTIF")
-
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
             for grp, df_grp in hasil.groupby("group"):
 
-                st.markdown(f"## 🏫 SEKOLAH NPSN {grp} ({len(df_grp)} Instalasi)")
+                st.markdown(f"### 🏫 Sekolah NPSN {grp} ({len(df_grp)} Instalasi)")
 
-                render_dashboard_table(
-                    df_grp.drop(columns=["group"])
+                st.dataframe(
+                    df_grp.drop(columns=["group"]),
+                    use_container_width=True,
+                    hide_index=True
                 )
 
         else:
