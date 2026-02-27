@@ -168,10 +168,8 @@ if sheet_url:
 
                 st.markdown(f"### 🏫 Sekolah NPSN {grp} ({len(df_grp)} Instalasi)")
 
-                st.dataframe(
-                    df_grp.drop(columns=["group"]),
-                    use_container_width=True,
-                    hide_index=True
+                st.table(
+                    df_grp.drop(columns=["group"])
                 )
 
         else:
