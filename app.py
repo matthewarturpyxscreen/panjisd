@@ -1,26 +1,22 @@
 import streamlit as st
 import pandas as pd
 
-# ===================================
+# =========================================
 # CONFIG
-# ===================================
-st.set_page_config(
-    page_title="Portal Data Sekolah",
-    layout="wide"
-)
+# =========================================
+st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
-# ===================================
-# ENTERPRISE STYLE + MINI PLAYER SAFE MODE
-# ===================================
+# =========================================
+# CLEAN ENTERPRISE STYLE
+# =========================================
 st.markdown("""
 <style>
 
-.stApp{
+.stApp {
     background:#f4f6f9;
 }
 
-/* HEADER */
-.header-box{
+.header-box {
     background:white;
     padding:18px;
     border-radius:10px;
@@ -28,8 +24,7 @@ st.markdown("""
     margin-bottom:20px;
 }
 
-/* STAT CARD */
-.stat-card{
+.stat-card {
     background:white;
     padding:15px;
     border-radius:10px;
@@ -37,85 +32,66 @@ st.markdown("""
     text-align:center;
 }
 
-/* TABLE FIT */
+/* TABEL FIT & RAPI */
 table {
-    width: 100% !important;
-    table-layout: auto !important;
-    border-collapse: collapse !important;
+    width:100% !important;
+    table-layout:fixed !important;
 }
 
-th, td {
-    padding: 8px !important;
-    text-align: left !important;
-    white-space: normal !important;
-    word-wrap: break-word !important;
-    font-size: 14px !important;
+thead tr th {
+    text-align:left !important;
 }
 
-/* ================= MINI PLAYER ================= */
-
-#mini-player {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 380px;
-    height: 240px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-    overflow: hidden;
-    resize: both;
-    z-index: 9999;
-}
-
-#mini-header {
-    background: #111827;
-    color: white;
-    padding: 6px 10px;
-    cursor: move;
-    font-size: 13px;
-}
-
-#mini-controls {
-    float: right;
-}
-
-.mini-btn {
-    cursor: pointer;
-    margin-left: 8px;
-}
-
-#mini-circle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 70px;
-    height: 70px;
-    background: #111827;
-    color: white;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    z-index: 9999;
+td {
+    white-space:normal !important;
+    word-wrap:break-word !important;
+    font-size:13px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ===================================
-# SIDEBAR
-# ===================================
+# =========================================
+# SIDEBAR MEDIA PLAYER
+# =========================================
 with st.sidebar:
-    st.title("📊 Portal Sekolah")
-    st.write("Dashboard Data Sekolah")
-    st.caption("Enterprise + Mini Player Mode")
 
-# ===================================
+    st.title("🎬 Media Player")
+
+    media_link = st.text_input("Masukkan Link YouTube / Playlist")
+
+    if media_link:
+
+        embed_url = None
+
+        # PLAYLIST
+        if "list=" in media_link:
+            playlist_id = media_link.split("list=")[-1].split("&")[0]
+            embed_url = f"https://www.youtube.com/embed/videoseries?list={playlist_id}&autoplay=1&rel=0"
+
+        # VIDEO BIASA
+        elif "watch?v=" in media_link:
+            video_id = media_link.split("watch?v=")[-1].split("&")[0]
+            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
+
+        # SHORT LINK
+        elif "youtu.be/" in media_link:
+            video_id = media_link.split("youtu.be/")[-1].split("?")[0]
+            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
+
+        if embed_url:
+            st.components.v1.iframe(
+                embed_url,
+                height=250,
+                scrolling=False
+            )
+
+    st.markdown("---")
+    st.caption("Player mendukung playlist & auto next")
+
+# =========================================
 # HEADER
-# ===================================
+# =========================================
 st.markdown("""
 <div class="header-box">
 <h2>Dashboard Data Sekolah</h2>
@@ -123,9 +99,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ===================================
-# INPUT
-# ===================================
+# =========================================
+# INPUT AREA
+# =========================================
 colA, colB = st.columns(2)
 
 with colA:
@@ -134,101 +110,9 @@ with colA:
 with colB:
     npsn = st.text_input("Cari NPSN")
 
-st.markdown("### 🎬 Media Player")
-media_link = st.text_input("Masukkan Link YouTube / Playlist")
-
-# ===================================
-# MINI PLAYER SAFE ENGINE
-# ===================================
-if media_link:
-
-    embed_url = None
-
-    if "list=" in media_link:
-        playlist_id = media_link.split("list=")[-1].split("&")[0]
-        embed_url = f"https://www.youtube.com/embed/videoseries?list={playlist_id}&autoplay=1"
-    elif "watch?v=" in media_link:
-        video_id = media_link.split("watch?v=")[-1].split("&")[0]
-        embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1"
-    elif "youtu.be/" in media_link:
-        video_id = media_link.split("youtu.be/")[-1].split("?")[0]
-        embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1"
-
-    if embed_url:
-        st.markdown(f"""
-        <div id="mini-player">
-            <div id="mini-header">
-                Media Player
-                <span id="mini-controls">
-                    <span class="mini-btn" onclick="minimizePlayer()">—</span>
-                    <span class="mini-btn" onclick="closePlayer()">✕</span>
-                </span>
-            </div>
-            <iframe width="100%" height="100%"
-                src="{embed_url}"
-                frameborder="0"
-                allow="autoplay; encrypted-media"
-                allowfullscreen>
-            </iframe>
-        </div>
-
-        <div id="mini-circle" onclick="expandPlayer()">
-            ▶
-        </div>
-
-        <script>
-        dragElement(document.getElementById("mini-player"));
-
-        function dragElement(elmnt) {{
-            var pos1=0,pos2=0,pos3=0,pos4=0;
-            document.getElementById("mini-header").onmousedown = dragMouseDown;
-
-            function dragMouseDown(e) {{
-                e=e||window.event;
-                e.preventDefault();
-                pos3=e.clientX;
-                pos4=e.clientY;
-                document.onmouseup=closeDragElement;
-                document.onmousemove=elementDrag;
-            }}
-
-            function elementDrag(e) {{
-                e=e||window.event;
-                e.preventDefault();
-                pos1=pos3-e.clientX;
-                pos2=pos4-e.clientY;
-                pos3=e.clientX;
-                pos4=e.clientY;
-                elmnt.style.top=(elmnt.offsetTop-pos2)+"px";
-                elmnt.style.left=(elmnt.offsetLeft-pos1)+"px";
-            }}
-
-            function closeDragElement() {{
-                document.onmouseup=null;
-                document.onmousemove=null;
-            }}
-        }}
-
-        function minimizePlayer(){{
-            document.getElementById("mini-player").style.display="none";
-            document.getElementById("mini-circle").style.display="flex";
-        }}
-
-        function expandPlayer(){{
-            document.getElementById("mini-player").style.display="block";
-            document.getElementById("mini-circle").style.display="none";
-        }}
-
-        function closePlayer(){{
-            document.getElementById("mini-player").style.display="none";
-            document.getElementById("mini-circle").style.display="none";
-        }}
-        </script>
-        """, unsafe_allow_html=True)
-
-# ===================================
+# =========================================
 # AUTO FORMAT DETECTOR (TIDAK DIUBAH)
-# ===================================
+# =========================================
 @st.cache_resource
 def load_all_sheets(url):
 
@@ -280,13 +164,31 @@ def load_all_sheets(url):
 
     return pd.DataFrame()
 
-# ===================================
-# DATA LOAD
-# ===================================
+# =========================================
+# LOAD DATA GLOBAL (TURBO ENGINE)
+# =========================================
 if sheet_url:
 
     data = load_all_sheets(sheet_url)
 
+    # =========================================
+    # STAT CARD
+    # =========================================
+    col1,col2,col3 = st.columns(3)
+
+    with col1:
+        st.markdown(f'<div class="stat-card"><h3>{len(data)}</h3><p>Total Baris Data</p></div>',unsafe_allow_html=True)
+
+    with col2:
+        total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
+        st.markdown(f'<div class="stat-card"><h3>{total_sekolah}</h3><p>Total Sekolah</p></div>',unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f'<div class="stat-card"><h3>{data["source_sheet"].nunique()}</h3><p>Total Sheet</p></div>',unsafe_allow_html=True)
+
+    # =========================================
+    # SEARCH RESULT
+    # =========================================
     if npsn:
 
         base_npsn = str(npsn).strip().split("_")[0]
