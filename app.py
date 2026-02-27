@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
 # =========================================
-# STYLE ENTERPRISE
+# STYLE ENTERPRISE + TOAST
 # =========================================
 st.markdown("""
 <style>
@@ -34,16 +34,6 @@ st.markdown("""
     text-align:center;
 }
 
-/* SUCCESS POPUP */
-.success-box {
-    background:#e6f4ea;
-    border-left:6px solid #22c55e;
-    padding:15px;
-    border-radius:8px;
-    margin-bottom:15px;
-    font-weight:600;
-}
-
 /* RESULT CARD */
 .result-card {
     background:white;
@@ -63,6 +53,30 @@ td, th {
     white-space:normal !important;
     word-wrap:break-word !important;
     font-size:13px;
+}
+
+/* FLOATING SUCCESS TOAST */
+.toast-success {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    padding: 16px 22px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    font-weight: 600;
+    z-index: 9999;
+    animation: slideIn 0.4s ease, fadeOut 0.5s ease 4s forwards;
+}
+
+@keyframes slideIn {
+    from {transform: translateX(120%); opacity:0;}
+    to {transform: translateX(0); opacity:1;}
+}
+
+@keyframes fadeOut {
+    to {opacity:0; transform: translateX(120%);}
 }
 
 </style>
@@ -124,7 +138,7 @@ with colC:
     search_btn = st.button("Search")
 
 # =========================================
-# AUTO FORMAT DETECTOR (TIDAK DIUBAH)
+# AUTO FORMAT DETECTOR (TURBO)
 # =========================================
 @st.cache_resource
 def load_all_sheets(url):
@@ -178,13 +192,13 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # =========================================
-# SEARCH LOGIC
+# SEARCH ENGINE
 # =========================================
 if sheet_url:
 
     data = load_all_sheets(sheet_url)
 
-    # STAT CARD
+    # STAT CARDS
     col1,col2,col3 = st.columns(3)
 
     with col1:
@@ -197,9 +211,6 @@ if sheet_url:
     with col3:
         st.markdown(f'<div class="stat-card"><h3>{data["source_sheet"].nunique()}</h3><p>Total Sheet</p></div>',unsafe_allow_html=True)
 
-    # =========================================
-    # KLIK SEARCH
-    # =========================================
     if search_btn and npsn_input:
 
         base_npsn = str(npsn_input).strip().split("_")[0]
@@ -212,25 +223,32 @@ if sheet_url:
         ]
 
         if len(hasil)>0:
+
             st.session_state.search_success = True
             st.session_state.search_result = hasil
+            st.session_state.base_npsn = base_npsn
+
         else:
             st.session_state.search_success = False
             st.session_state.search_result = None
 
-        # AUTO CLEAR INPUT
         st.session_state.npsn_box = ""
 
-    # =========================================
-    # TAMPILKAN HASIL
-    # =========================================
     if "search_success" in st.session_state:
 
         if st.session_state.search_success:
 
-            st.markdown('<div class="success-box">✅ Data berhasil ditemukan</div>', unsafe_allow_html=True)
-
             hasil = st.session_state.search_result
+            base_npsn = st.session_state.base_npsn
+
+            st.markdown(f"""
+            <div class="toast-success">
+                ✔ NPSN {base_npsn} berhasil ditemukan
+                <br>
+                Total Instalasi: {len(hasil)}
+            </div>
+            """, unsafe_allow_html=True)
+
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
             for grp, df_grp in hasil.groupby("group"):
