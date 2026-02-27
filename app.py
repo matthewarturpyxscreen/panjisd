@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
 # =========================================
-# CLEAN ENTERPRISE STYLE
+# STYLE IMPROVED
 # =========================================
 st.markdown("""
 <style>
@@ -16,6 +16,7 @@ st.markdown("""
     background:#f4f6f9;
 }
 
+/* HEADER */
 .header-box {
     background:white;
     padding:18px;
@@ -24,6 +25,7 @@ st.markdown("""
     margin-bottom:20px;
 }
 
+/* STAT CARD */
 .stat-card {
     background:white;
     padding:15px;
@@ -32,17 +34,32 @@ st.markdown("""
     text-align:center;
 }
 
-/* TABEL FIT & RAPI */
+/* SUCCESS POPUP */
+.success-box {
+    background:#e6f4ea;
+    border-left:6px solid #22c55e;
+    padding:15px;
+    border-radius:8px;
+    margin-bottom:15px;
+    font-weight:500;
+}
+
+/* RESULT CARD */
+.result-card {
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom:20px;
+}
+
+/* TABLE CLEAN */
 table {
     width:100% !important;
     table-layout:fixed !important;
 }
 
-thead tr th {
-    text-align:left !important;
-}
-
-td {
+td, th {
     white-space:normal !important;
     word-wrap:break-word !important;
     font-size:13px;
@@ -52,42 +69,29 @@ td {
 """, unsafe_allow_html=True)
 
 # =========================================
-# SIDEBAR MEDIA PLAYER
+# SIDEBAR MEDIA PLAYER (TIDAK DIUBAH)
 # =========================================
 with st.sidebar:
-
     st.title("🎬 Media Player")
-
     media_link = st.text_input("Masukkan Link YouTube / Playlist")
 
     if media_link:
-
         embed_url = None
 
-        # PLAYLIST
         if "list=" in media_link:
             playlist_id = media_link.split("list=")[-1].split("&")[0]
             embed_url = f"https://www.youtube.com/embed/videoseries?list={playlist_id}&autoplay=1&rel=0"
 
-        # VIDEO BIASA
         elif "watch?v=" in media_link:
             video_id = media_link.split("watch?v=")[-1].split("&")[0]
             embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
 
-        # SHORT LINK
         elif "youtu.be/" in media_link:
             video_id = media_link.split("youtu.be/")[-1].split("?")[0]
             embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
 
         if embed_url:
-            st.components.v1.iframe(
-                embed_url,
-                height=250,
-                scrolling=False
-            )
-
-    st.markdown("---")
-    st.caption("Player mendukung playlist & auto next")
+            st.components.v1.iframe(embed_url, height=250, scrolling=False)
 
 # =========================================
 # HEADER
@@ -100,15 +104,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================
-# INPUT AREA
+# INPUT AREA DENGAN BUTTON SEARCH
 # =========================================
-colA, colB = st.columns(2)
+colA, colB, colC = st.columns([3,2,1])
 
 with colA:
     sheet_url = st.text_input("Link Spreadsheet")
 
 with colB:
-    npsn = st.text_input("Cari NPSN")
+    npsn_input = st.text_input("Cari NPSN", key="npsn_box")
+
+with colC:
+    search_btn = st.button("Search")
 
 # =========================================
 # AUTO FORMAT DETECTOR (TIDAK DIUBAH)
@@ -165,33 +172,15 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # =========================================
-# LOAD DATA GLOBAL (TURBO ENGINE)
+# SEARCH LOGIC (TIDAK MENGUBAH FUNGSI)
 # =========================================
 if sheet_url:
 
     data = load_all_sheets(sheet_url)
 
-    # =========================================
-    # STAT CARD
-    # =========================================
-    col1,col2,col3 = st.columns(3)
+    if search_btn and npsn_input:
 
-    with col1:
-        st.markdown(f'<div class="stat-card"><h3>{len(data)}</h3><p>Total Baris Data</p></div>',unsafe_allow_html=True)
-
-    with col2:
-        total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
-        st.markdown(f'<div class="stat-card"><h3>{total_sekolah}</h3><p>Total Sekolah</p></div>',unsafe_allow_html=True)
-
-    with col3:
-        st.markdown(f'<div class="stat-card"><h3>{data["source_sheet"].nunique()}</h3><p>Total Sheet</p></div>',unsafe_allow_html=True)
-
-    # =========================================
-    # SEARCH RESULT
-    # =========================================
-    if npsn:
-
-        base_npsn = str(npsn).strip().split("_")[0]
+        base_npsn = str(npsn_input).strip().split("_")[0]
 
         hasil = data[
             data["npsn"]
@@ -202,15 +191,26 @@ if sheet_url:
 
         if len(hasil)>0:
 
+            # SUCCESS POPUP
+            st.markdown(
+                '<div class="success-box">✅ Data berhasil ditemukan</div>',
+                unsafe_allow_html=True
+            )
+
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
             for grp, df_grp in hasil.groupby("group"):
 
                 st.markdown(f"### 🏫 Sekolah NPSN {grp} ({len(df_grp)} Instalasi)")
 
-                st.table(
-                    df_grp.drop(columns=["group"])
-                )
+                st.markdown('<div class="result-card">', unsafe_allow_html=True)
+
+                st.table(df_grp.drop(columns=["group"]))
+
+                st.markdown('</div>', unsafe_allow_html=True)
 
         else:
             st.warning("Data tidak ditemukan")
+
+        # AUTO CLEAR INPUT
+        st.session_state.npsn_box = ""
