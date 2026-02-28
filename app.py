@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
+import uuid
 
 # =========================================
 # CONFIG
@@ -7,16 +9,12 @@ import pandas as pd
 st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
 # =========================================
-# STYLE ENTERPRISE + TOAST
+# STYLE
 # =========================================
 st.markdown("""
 <style>
+.stApp { background:#f4f6f9; }
 
-.stApp {
-    background:#f4f6f9;
-}
-
-/* HEADER */
 .header-box {
     background:white;
     padding:18px;
@@ -25,7 +23,6 @@ st.markdown("""
     margin-bottom:20px;
 }
 
-/* STAT CARD */
 .stat-card {
     background:white;
     padding:15px;
@@ -34,7 +31,6 @@ st.markdown("""
     text-align:center;
 }
 
-/* RESULT CARD */
 .result-card {
     background:white;
     padding:15px;
@@ -43,7 +39,6 @@ st.markdown("""
     margin-bottom:20px;
 }
 
-/* TABLE FIT */
 table {
     width:100% !important;
     table-layout:fixed !important;
@@ -55,16 +50,15 @@ td, th {
     font-size:13px;
 }
 
-/* FLOATING SUCCESS TOAST */
 .toast-success {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
+    top: 25px;
+    right: 25px;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
     color: white;
-    padding: 16px 22px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    padding: 18px 24px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     font-weight: 600;
     z-index: 9999;
     animation: slideIn 0.4s ease, fadeOut 0.5s ease 4s forwards;
@@ -79,39 +73,13 @@ td, th {
     to {opacity:0; transform: translateX(120%);}
 }
 
+.update-indicator {
+    font-size:12px;
+    color:#6b7280;
+    margin-bottom:10px;
+}
 </style>
 """, unsafe_allow_html=True)
-
-# =========================================
-# SIDEBAR MEDIA PLAYER
-# =========================================
-with st.sidebar:
-
-    st.title("🎬 Media Player")
-
-    media_link = st.text_input("Masukkan Link YouTube / Playlist")
-
-    if media_link:
-
-        embed_url = None
-
-        if "list=" in media_link:
-            playlist_id = media_link.split("list=")[-1].split("&")[0]
-            embed_url = f"https://www.youtube.com/embed/videoseries?list={playlist_id}&autoplay=1&rel=0"
-
-        elif "watch?v=" in media_link:
-            video_id = media_link.split("watch?v=")[-1].split("&")[0]
-            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
-
-        elif "youtu.be/" in media_link:
-            video_id = media_link.split("youtu.be/")[-1].split("?")[0]
-            embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1&rel=0"
-
-        if embed_url:
-            st.components.v1.iframe(embed_url, height=250)
-
-    st.markdown("---")
-    st.caption("Mendukung playlist & auto next")
 
 # =========================================
 # HEADER
@@ -124,24 +92,40 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================
-# INPUT AREA
+# SESSION INIT
 # =========================================
-colA, colB, colC = st.columns([3,2,1])
+if "refresh_token" not in st.session_state:
+    st.session_state.refresh_token = str(uuid.uuid4())
+
+if "last_sheet_url" not in st.session_state:
+    st.session_state.last_sheet_url = None
+
+# =========================================
+# INPUT
+# =========================================
+colA, colB = st.columns([3,2])
 
 with colA:
-    sheet_url = st.text_input("Link Spreadsheet")
+    sheet_url = st.text_input("Link Spreadsheet", key="sheet_input")
 
 with colB:
-    npsn_input = st.text_input("Cari NPSN", key="npsn_box")
-
-with colC:
-    search_btn = st.button("Search")
+    npsn_input = st.text_input("Cari NPSN (Tekan Enter)", key="npsn_box")
 
 # =========================================
-# AUTO FORMAT DETECTOR (TURBO)
+# DETECT RE-SUBMIT LINK
 # =========================================
-@st.cache_resource
-def load_all_sheets(url):
+if sheet_url:
+
+    if sheet_url != st.session_state.last_sheet_url:
+        # link berubah → buat token baru
+        st.session_state.refresh_token = str(uuid.uuid4())
+        st.session_state.last_sheet_url = sheet_url
+
+# =========================================
+# CACHE TTL 1 JAM + VERSION KEY
+# =========================================
+@st.cache_data(ttl=3600)
+def load_all_sheets(url, refresh_token):
 
     if "docs.google.com" in url:
         url = url.replace("/edit?usp=sharing","/export?format=xlsx")
@@ -192,13 +176,17 @@ def load_all_sheets(url):
     return pd.DataFrame()
 
 # =========================================
-# SEARCH ENGINE
+# LOAD DATA
 # =========================================
 if sheet_url:
 
-    data = load_all_sheets(sheet_url)
+    data = load_all_sheets(sheet_url, st.session_state.refresh_token)
 
-    # STAT CARDS
+    st.markdown(
+        f'<div class="update-indicator">Sinkronisasi terakhir: {datetime.now().strftime("%H:%M:%S")}</div>',
+        unsafe_allow_html=True
+    )
+
     col1,col2,col3 = st.columns(3)
 
     with col1:
@@ -211,7 +199,10 @@ if sheet_url:
     with col3:
         st.markdown(f'<div class="stat-card"><h3>{data["source_sheet"].nunique()}</h3><p>Total Sheet</p></div>',unsafe_allow_html=True)
 
-    if search_btn and npsn_input:
+    # =========================================
+    # SEARCH
+    # =========================================
+    if npsn_input:
 
         base_npsn = str(npsn_input).strip().split("_")[0]
 
@@ -224,23 +215,6 @@ if sheet_url:
 
         if len(hasil)>0:
 
-            st.session_state.search_success = True
-            st.session_state.search_result = hasil
-            st.session_state.base_npsn = base_npsn
-
-        else:
-            st.session_state.search_success = False
-            st.session_state.search_result = None
-
-        st.session_state.npsn_box = ""
-
-    if "search_success" in st.session_state:
-
-        if st.session_state.search_success:
-
-            hasil = st.session_state.search_result
-            base_npsn = st.session_state.base_npsn
-
             st.markdown(f"""
             <div class="toast-success">
                 ✔ NPSN {base_npsn} berhasil ditemukan
@@ -252,12 +226,13 @@ if sheet_url:
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
             for grp, df_grp in hasil.groupby("group"):
-
                 st.markdown(f"### 🏫 Sekolah NPSN {grp} ({len(df_grp)} Instalasi)")
-
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
                 st.table(df_grp.drop(columns=["group"]))
                 st.markdown('</div>', unsafe_allow_html=True)
 
         else:
             st.warning("Data tidak ditemukan")
+
+        st.session_state.npsn_box = ""
+        st.rerun()
