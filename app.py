@@ -302,19 +302,34 @@ function onYouTubeIframeAPIReady() {{
     width:  '100%',
     videoId: Q[cur],
     playerVars: {{
-      autoplay:        1,
-      rel:             0,
-      modestbranding:  1,
-      playsinline:     1,
+      autoplay:       1,
+      mute:           1,   /* WAJIB: browser izinkan autoplay hanya jika muted */
+      rel:            0,
+      modestbranding: 1,
+      playsinline:    1,
     }},
     events: {{
-      onReady:       function(e) {{ e.target.playVideo(); updateUI(); }},
+      onReady: function(e) {{
+        e.target.playVideo();
+        updateUI();
+        /* Unmute otomatis setelah 800ms — user tidak perlu klik apapun */
+        setTimeout(function() {{
+          if (player && player.unMute) {{
+            player.unMute();
+            player.setVolume(80);
+          }}
+        }}, 800);
+      }},
       onStateChange: function(e) {{
         /* YT.PlayerState.ENDED == 0  →  auto-next */
         if (e.data === 0) {{
           if (cur + 1 < Q.length) {{
             cur++;
             player.loadVideoById(Q[cur]);
+            /* Pastikan tetap unmuted saat skip ke next */
+            setTimeout(function() {{
+              if (player && player.unMute) {{ player.unMute(); player.setVolume(80); }}
+            }}, 300);
             updateUI();
           }}
         }}
