@@ -25,30 +25,25 @@ for k, v in defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
-# =========================================
-# THEME VARS
-# =========================================
 DM = st.session_state.dark_mode
 
 T = {
-    "bg":           "#0f172a" if DM else "#f0f4fa",
-    "surface":      "#1e293b" if DM else "#ffffff",
-    "surface2":     "#273449" if DM else "#f8fafc",
-    "border":       "#334155" if DM else "#e2e8f0",
-    "text":         "#f1f5f9" if DM else "#1e293b",
-    "text2":        "#94a3b8" if DM else "#64748b",
-    "text3":        "#64748b" if DM else "#94a3b8",
-    "accent":       "#3b82f6",
-    "accent_dark":  "#1d4ed8",
-    "scrollbar_bg": "#1e293b" if DM else "#e2e8f0",
-    "sidebar_bg":   "#1e293b" if DM else "#ffffff",
-    "sidebar_bdr":  "#334155" if DM else "#e2e8f0",
-    "input_bg":     "#0f172a" if DM else "#f8fafc",
-    "thead_bg":     "#111827" if DM else "#f8fafc",
-    "tbody_hover":  "#1e3a5f" if DM else "#f0f7ff",
-    "tbody_bdr":    "#1e293b" if DM else "#f1f5f9",
-    "sync_bar_bg":  "#1e293b" if DM else "#ffffff",
-    "result_hdr":   "#1e293b" if DM else "#f8fafc",
+    "bg":          "#0f172a" if DM else "#f0f4fa",
+    "surface":     "#1e293b" if DM else "#ffffff",
+    "surface2":    "#273449" if DM else "#f8fafc",
+    "border":      "#334155" if DM else "#e2e8f0",
+    "text":        "#f1f5f9" if DM else "#1e293b",
+    "text2":       "#94a3b8" if DM else "#64748b",
+    "text3":       "#64748b" if DM else "#94a3b8",
+    "accent":      "#3b82f6",
+    "input_bg":    "#0f172a" if DM else "#f8fafc",
+    "thead_bg":    "#111827" if DM else "#f8fafc",
+    "tbody_hover": "#1e3a5f" if DM else "#f0f7ff",
+    "tbody_bdr":   "#1e293b" if DM else "#f1f5f9",
+    "sync_bg":     "#1e293b" if DM else "#ffffff",
+    "result_hdr":  "#1e293b" if DM else "#f8fafc",
+    "sidebar_bg":  "#1e293b" if DM else "#ffffff",
+    "sidebar_bdr": "#334155" if DM else "#e2e8f0",
 }
 
 # =========================================
@@ -61,13 +56,12 @@ st.markdown(f"""
 
 .stApp{{background:{T['bg']};font-family:'IBM Plex Sans',sans-serif;color:{T['text']}}}
 ::-webkit-scrollbar{{width:5px;height:5px}}
-::-webkit-scrollbar-track{{background:{T['scrollbar_bg']}}}
+::-webkit-scrollbar-track{{background:{T['surface2']}}}
 ::-webkit-scrollbar-thumb{{background:{T['accent']};border-radius:3px}}
 
 [data-testid="stSidebar"]{{background:{T['sidebar_bg']}!important;border-right:1px solid {T['sidebar_bdr']}!important}}
 [data-testid="stSidebar"] > div{{padding:16px 14px!important}}
 
-/* HEADER */
 .header-wrap{{display:flex;align-items:center;gap:16px;padding:18px 24px;
     background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 60%,#3b82f6 100%);
     border-radius:10px;margin-bottom:20px;position:relative;overflow:hidden;
@@ -82,24 +76,23 @@ st.markdown(f"""
     color:#fff;border:1px solid rgba(255,255,255,0.3);padding:4px 10px;
     border-radius:20px;background:rgba(255,255,255,0.12);white-space:nowrap}}
 
-/* STAT CARDS */
 .stat-row{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}}
 .stat-card{{background:{T['surface']};border:1px solid {T['border']};border-radius:10px;
     padding:16px 18px;box-shadow:0 1px 5px rgba(0,0,0,0.08);display:flex;align-items:center;gap:14px}}
 .stat-icon{{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;
     justify-content:center;font-size:18px;flex-shrink:0}}
-.stat-icon.blue{{background:#1e3a5f}}.stat-icon.green{{background:#14532d}}.stat-icon.purple{{background:#3b0764}}
+.stat-icon.blue{{background:{"#1e3a5f" if DM else "#dbeafe"}}}
+.stat-icon.green{{background:{"#14532d" if DM else "#dcfce7"}}}
+.stat-icon.purple{{background:{"#3b0764" if DM else "#ede9fe"}}}
 .stat-label{{font-size:10px;text-transform:uppercase;letter-spacing:.8px;
     color:{T['text3']};font-family:'IBM Plex Mono',monospace;margin-bottom:2px}}
 .stat-value{{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:{T['text']};line-height:1}}
 .stat-desc{{font-size:11px;color:{T['text3']};margin-top:2px}}
 
-/* PANEL TITLE */
 .panel-title{{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;
     letter-spacing:1px;color:{T['text2']};margin:0 0 10px 0;display:flex;align-items:center;gap:7px}}
 .panel-title .bar{{display:inline-block;width:3px;height:13px;background:{T['accent']};border-radius:2px}}
 
-/* INPUT */
 div[data-testid="stForm"]{{background:transparent!important;border:none!important;padding:0!important;margin:0!important}}
 .stTextInput>div>div>input{{background:{T['input_bg']}!important;border:1px solid {T['border']}!important;
     color:{T['text']}!important;border-radius:8px!important;
@@ -109,22 +102,18 @@ div[data-testid="stForm"]{{background:transparent!important;border:none!importan
 .stTextInput>label{{color:{T['text2']}!important;font-size:11px!important;
     font-family:'IBM Plex Mono',monospace!important;text-transform:uppercase!important;letter-spacing:.8px!important}}
 
-/* BUTTON */
 .stButton>button,.stFormSubmitButton>button{{background:#2563eb!important;color:#fff!important;
     border:none!important;border-radius:8px!important;font-family:'IBM Plex Mono',monospace!important;
     font-size:11px!important;font-weight:600!important;letter-spacing:.4px!important;
     padding:8px 16px!important;transition:all .15s!important;box-shadow:0 2px 6px rgba(37,99,235,.25)!important}}
 .stButton>button:hover,.stFormSubmitButton>button:hover{{background:#1d4ed8!important;transform:translateY(-1px)!important}}
 
-/* SYNC BAR */
 .sync-bar{{display:flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;
     font-size:11px;color:{T['text2']};margin-bottom:16px;padding:8px 14px;
-    background:{T['sync_bar_bg']};border:1px solid {T['border']};border-radius:8px;
-    box-shadow:0 1px 4px rgba(0,0,0,.06)}}
+    background:{T['sync_bg']};border:1px solid {T['border']};border-radius:8px}}
 .sync-dot{{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite;flex-shrink:0}}
 @keyframes pulse{{0%,100%{{box-shadow:0 0 0 2px rgba(34,197,94,.25)}}50%{{box-shadow:0 0 0 5px rgba(34,197,94,.08)}}}}
 
-/* RESULT */
 .result-header{{display:flex;align-items:center;gap:9px;padding:11px 16px;
     background:{T['result_hdr']};border:1px solid {T['border']};border-bottom:2px solid {T['accent']};
     border-radius:10px 10px 0 0;font-family:'IBM Plex Mono',monospace;
@@ -134,7 +123,6 @@ div[data-testid="stForm"]{{background:transparent!important;border:none!importan
 .result-card{{background:{T['surface']};border:1px solid {T['border']};border-top:none;
     border-radius:0 0 10px 10px;margin-bottom:18px;overflow:hidden}}
 
-/* SUCCESS BANNER */
 .success-banner{{background:{"rgba(20,83,45,0.3)" if DM else "linear-gradient(135deg,#dcfce7,#f0fdf4)"};
     border:1px solid {"#166534" if DM else "#86efac"};border-left:4px solid #22c55e;border-radius:10px;
     padding:13px 18px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;
@@ -144,7 +132,6 @@ div[data-testid="stForm"]{{background:transparent!important;border:none!importan
 .success-title{{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#4ade80;margin-bottom:2px}}
 .success-msg{{font-size:11px;color:{"#86efac" if DM else "#166534"}}}
 
-/* TABLE */
 .stTable,table{{width:100%!important;border-collapse:collapse!important;
     font-size:12px!important;font-family:'IBM Plex Sans',sans-serif!important}}
 thead tr{{background:{T['thead_bg']}!important}}
@@ -157,7 +144,6 @@ tbody tr:hover{{background:{T['tbody_hover']}!important}}
 tbody td{{padding:8px 12px!important;color:{T['text']}!important;
     white-space:normal!important;word-break:break-word!important;border:none!important}}
 
-/* TOAST */
 .toast{{position:fixed;top:20px;right:20px;background:{T['surface']};
     border:1px solid #166534;border-left:4px solid #22c55e;color:{T['text']};
     padding:12px 18px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.25);
@@ -170,20 +156,20 @@ tbody td{{padding:8px 12px!important;color:{T['text']}!important;
 
 hr{{border:none;border-top:1px solid {T['border']};margin:16px 0}}
 
-/* SIDEBAR YT LABEL */
-.sb-yt-label{{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;
-    letter-spacing:1px;color:{T['text2']};margin-bottom:10px;
-    display:flex;align-items:center;gap:7px}}
-.sb-bar{{display:inline-block;width:3px;height:13px;background:#ff0000;border-radius:2px}}
-.yt-empty-sb{{text-align:center;padding:18px 10px;color:{T['text3']};
+.yt-empty{{text-align:center;padding:20px 10px;color:{T['text3']};
     font-family:'IBM Plex Mono',monospace;font-size:10px;
-    border:1px dashed {T['border']};border-radius:8px;margin-bottom:10px;
+    border:1px dashed {T['border']};border-radius:8px;
     background:{T['surface2']}}}
+
+.sb-section-title{{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;
+    letter-spacing:1px;color:{T['text3']};margin-bottom:8px;display:flex;align-items:center;gap:6px}}
+.sb-red-bar{{display:inline-block;width:3px;height:12px;background:#ff0000;border-radius:2px}}
 </style>
 """, unsafe_allow_html=True)
 
+
 # =========================================
-# YT HELPERS
+# YT HELPER
 # =========================================
 def extract_yt_id(url):
     for p in [r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})", r"^([A-Za-z0-9_-]{11})$"]:
@@ -192,336 +178,266 @@ def extract_yt_id(url):
             return m.group(1)
     return None
 
+
 # =========================================
-# YOUTUBE PLAYER COMPONENT (HTML+JS)
-# Menggunakan YouTube IFrame API untuk:
-# - Auto-next saat lagu habis (onStateChange)
-# - Tombol prev/next yang real
-# - Queue visual yang benar
+# YT PLAYER HTML — pakai YouTube IFrame API resmi
+# onStateChange(0) = video ended → auto next
+# Tidak ada tombol custom, kontrol dari YT sendiri
 # =========================================
-def render_yt_player(queue, current_idx, is_floating=False, dark=False):
+def build_yt_player(queue, start_idx, dark=False, floating=False):
     if not queue:
         return ""
 
-    queue_json = json.dumps(queue)
-    bg         = "#1e293b" if dark else "#ffffff"
-    bg2        = "#0f172a" if dark else "#f8fafc"
-    border     = "#334155" if dark else "#e2e8f0"
-    text       = "#f1f5f9" if dark else "#1e293b"
-    text2      = "#94a3b8" if dark else "#64748b"
-    text3      = "#64748b" if dark else "#94a3b8"
-    active_bg  = "#1e3a5f" if dark else "#dbeafe"
-    active_c   = "#60a5fa" if dark else "#1d4ed8"
-    hover_bg   = "#273449" if dark else "#f0f7ff"
-    btn_bg     = "#273449" if dark else "#f1f5f9"
-    btn_hover  = "#334155" if dark else "#e2e8f0"
+    q_json   = json.dumps(queue)
+    bg       = "#111827" if dark else "#ffffff"
+    bg2      = "#0f172a" if dark else "#f8fafc"
+    border   = "#1f2937" if dark else "#e2e8f0"
+    text     = "#f1f5f9" if dark else "#1e293b"
+    text2    = "#6b7280" if dark else "#64748b"
+    text3    = "#4b5563" if dark else "#94a3b8"
+    act_bg   = "#1e3a5f" if dark else "#dbeafe"
+    act_c    = "#60a5fa" if dark else "#1d4ed8"
+    hov_bg   = "#1f2937" if dark else "#f0f7ff"
 
-    width      = "300px" if is_floating else "100%"
-    float_css  = """
-        position:fixed;bottom:24px;right:24px;width:310px;z-index:9998;
-        box-shadow:0 20px 60px rgba(0,0,0,0.35);
+    float_style = """
+        position:fixed;bottom:22px;right:22px;width:320px;
+        z-index:9998;box-shadow:0 20px 60px rgba(0,0,0,0.45);
         animation:floatIn .3s cubic-bezier(.34,1.2,.64,1);
-    """ if is_floating else ""
+    """ if floating else "width:100%;"
 
-    html = f"""
-<!DOCTYPE html>
+    return f"""<!DOCTYPE html>
 <html>
 <head>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap');
-  *{{box-sizing:border-box;margin:0;padding:0}}
-  body{{background:transparent;font-family:'IBM Plex Sans',sans-serif}}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap');
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:transparent;font-family:'IBM Plex Mono',monospace}}
+@keyframes floatIn{{from{{transform:translateY(20px) scale(.97);opacity:0}}to{{transform:translateY(0) scale(1);opacity:1}}}}
 
-  @keyframes floatIn{{from{{transform:translateY(20px) scale(.97);opacity:0}}to{{transform:translateY(0) scale(1);opacity:1}}}}
-
-  .wrap{{
-    background:{bg};border:1px solid {border};border-radius:12px;
-    overflow:hidden;width:{width};{float_css}
-  }}
-  .hdr{{display:flex;align-items:center;justify-content:space-between;
+.wrap{{background:{bg};border:1px solid {border};border-radius:12px;overflow:hidden;{float_style}}}
+.hdr{{display:flex;align-items:center;justify-content:space-between;
     padding:9px 12px;background:{bg2};border-bottom:1px solid {border}}}
-  .hdr-left{{display:flex;align-items:center;gap:7px;
-    font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:{text}}}
-  .yt-badge{{background:#ff0000;color:#fff;font-size:8px;font-weight:700;
-    padding:2px 5px;border-radius:3px;letter-spacing:.4px}}
-  .counter{{font-size:10px;color:{text2};font-family:'IBM Plex Mono',monospace}}
+.hdr-l{{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:{text}}}
+.yt-badge{{background:#ff0000;color:#fff;font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px}}
+.counter{{font-size:10px;color:{text2}}}
 
-  #player-frame{{width:100%;aspect-ratio:16/9;border:none;display:block;background:#000}}
+/* Player container — YT iframe masuk sini via API */
+#player{{width:100%;aspect-ratio:16/9;background:#000;display:block}}
+#player iframe{{width:100%!important;height:100%!important}}
 
-  .controls{{display:flex;gap:6px;padding:9px 12px;background:{bg2};border-top:1px solid {border}}}
-  .btn{{flex:1;background:{btn_bg};border:1px solid {border};border-radius:7px;
-    padding:6px 4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
-    color:{text};cursor:pointer;text-align:center;transition:all .12s;font-weight:500}}
-  .btn:hover{{background:{btn_hover};color:{active_c}}}
-  .btn.danger:hover{{background:#fee2e2;color:#dc2626;border-color:#fca5a5}}
-  .btn.purple:hover{{background:{active_bg};color:{active_c}}}
-
-  .queue{{padding:0 10px 10px;max-height:150px;overflow-y:auto;background:{bg}}}
-  .queue::-webkit-scrollbar{{width:4px}}
-  .queue::-webkit-scrollbar-thumb{{background:{border};border-radius:2px}}
-  .qlabel{{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;
-    letter-spacing:1px;color:{text3};padding:8px 0 5px;border-top:1px solid {border}}}
-  .qitem{{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;
-    font-size:11px;color:{text2};margin-bottom:1px;cursor:default;transition:background .1s}}
-  .qitem.active{{background:{active_bg};color:{active_c};font-weight:600}}
-  .qitem:not(.active):hover{{background:{hover_bg}}}
-  .qnum{{font-family:'IBM Plex Mono',monospace;font-size:9px;color:{text3};
-    width:14px;text-align:center;flex-shrink:0}}
-  .qitem.active .qnum{{color:{active_c}}}
-  .qurl{{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;font-size:10px}}
-  .now-icon{{flex-shrink:0;font-size:10px}}
+.queue-wrap{{max-height:160px;overflow-y:auto;background:{bg}}}
+.queue-wrap::-webkit-scrollbar{{width:3px}}
+.queue-wrap::-webkit-scrollbar-thumb{{background:{border};border-radius:2px}}
+.qlabel{{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:{text3};
+    padding:7px 12px 4px;border-top:1px solid {border}}}
+.qitem{{display:flex;align-items:center;gap:7px;padding:5px 12px;
+    font-size:10px;color:{text2};cursor:pointer;transition:background .1s;user-select:none}}
+.qitem:hover{{background:{hov_bg};color:{act_c}}}
+.qitem.active{{background:{act_bg};color:{act_c};font-weight:600}}
+.qnum{{width:14px;text-align:center;flex-shrink:0;color:{text3};font-size:9px}}
+.qitem.active .qnum{{color:{act_c}}}
+.qurl{{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+.play-ic{{flex-shrink:0;font-size:9px}}
 </style>
 </head>
 <body>
-<div class="wrap" id="wrap">
+<div class="wrap">
   <div class="hdr">
-    <div class="hdr-left">
+    <div class="hdr-l">
       <span class="yt-badge">YT</span>
-      <span id="title-label">Now Playing</span>
+      <span id="hdr-title">Now Playing</span>
     </div>
-    <span class="counter" id="counter">0/0</span>
+    <span class="counter" id="counter">— / —</span>
   </div>
 
-  <div id="player-container">
-    <iframe id="player-frame"
-      src=""
-      allow="autoplay; encrypted-media; fullscreen"
-      allowfullscreen>
-    </iframe>
-  </div>
+  <!-- YouTube IFrame API akan inject iframe ke sini -->
+  <div id="player"></div>
 
-  <div class="controls">
-    <button class="btn" id="btn-prev" onclick="prevTrack()">⏮ Prev</button>
-    <button class="btn" id="btn-pp" onclick="togglePause()">⏸ Pause</button>
-    <button class="btn" id="btn-next" onclick="nextTrack()">⏭ Next</button>
-  </div>
-
-  <div class="queue">
+  <div class="queue-wrap">
     <div class="qlabel" id="qlabel">Antrian</div>
     <div id="queue-list"></div>
   </div>
 </div>
 
+<!-- Load YouTube IFrame API resmi -->
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-  var queue   = {queue_json};
-  var current = {current_idx};
-  var paused  = false;
-  var playerReady = false;
-  var ytPlayer = null;
+var QUEUE   = {q_json};
+var current = {start_idx};
+var player  = null;
+var ready   = false;
 
-  function buildSrc(idx) {{
-    // Bangun playlist= agar YT bisa auto-next secara native
-    var vid  = queue[idx];
-    var rest = queue.filter(function(_,i){{return i!==idx}});
-    var pl   = [vid].concat(rest).join(',');
-    return 'https://www.youtube-nocookie.com/embed/' + vid
-         + '?enablejsapi=1&autoplay=1&rel=0&modestbranding=1'
-         + '&playlist=' + pl + '&origin=' + encodeURIComponent(window.location.origin);
-  }}
-
-  function loadTrack(idx) {{
-    if(idx < 0) idx = 0;
-    if(idx >= queue.length) idx = queue.length - 1;
-    current = idx;
-    paused  = false;
-    document.getElementById('btn-pp').textContent = '⏸ Pause';
-
-    var frame = document.getElementById('player-frame');
-    frame.src = buildSrc(idx);
-    updateUI();
-
-    // Listen for YT IFrame API messages (auto-next when ended)
-    window.addEventListener('message', onYTMessage);
-  }}
-
-  function onYTMessage(e) {{
-    try {{
-      var data = JSON.parse(e.data);
-      // YT sends info: playerState 0 = ended
-      if(data && data.event === 'infoDelivery' && data.info) {{
-        if(data.info.playerState === 0) {{
-          // video ended → next
-          if(current + 1 < queue.length) {{
-            nextTrack();
-          }}
-        }}
-        if(data.info.playerState === 2) paused = true;
-        if(data.info.playerState === 1) paused = false;
-      }}
-    }} catch(err) {{}}
-  }}
-
-  function updateUI() {{
-    // Counter
-    document.getElementById('counter').textContent = (current+1) + '/' + queue.length;
-    document.getElementById('title-label').textContent = 'Now Playing';
-    document.getElementById('qlabel').textContent = 'Antrian — ' + queue.length + ' video';
-
-    // Queue list
-    var html = '';
-    for(var i=0;i<queue.length;i++) {{
-      var cls   = i===current ? 'qitem active' : 'qitem';
-      var icon  = i===current ? '<span class="now-icon">▶</span>' : '';
-      var short = queue[i];
-      html += '<div class="' + cls + '">'
-            + '<span class="qnum">' + (i+1) + '</span>'
-            + icon
-            + '<span class="qurl">youtu.be/' + short + '</span>'
-            + '</div>';
+// Dipanggil otomatis oleh YT API saat siap
+function onYouTubeIframeAPIReady() {{
+  player = new YT.Player('player', {{
+    videoId: QUEUE[current],
+    playerVars: {{
+      autoplay: 1,
+      rel: 0,
+      modestbranding: 1,
+      // enablejsapi otomatis aktif via IFrame API
+    }},
+    events: {{
+      onReady:       onPlayerReady,
+      onStateChange: onPlayerStateChange,
     }}
-    document.getElementById('queue-list').innerHTML = html;
+  }});
+}}
 
-    // Scroll active into view
-    var activeEl = document.querySelector('.qitem.active');
-    if(activeEl) activeEl.scrollIntoView({{block:'nearest',behavior:'smooth'}});
-  }}
+function onPlayerReady(e) {{
+  ready = true;
+  updateUI();
+  e.target.playVideo();
+}}
 
-  function prevTrack() {{
-    if(current > 0) loadTrack(current - 1);
+function onPlayerStateChange(e) {{
+  // YT.PlayerState.ENDED = 0
+  if (e.data === YT.PlayerState.ENDED) {{
+    if (current + 1 < QUEUE.length) {{
+      current++;
+      player.loadVideoById(QUEUE[current]);
+      updateUI();
+    }}
   }}
+}}
 
-  function nextTrack() {{
-    if(current + 1 < queue.length) loadTrack(current + 1);
-  }}
+function playTrack(idx) {{
+  if (!ready) return;
+  current = idx;
+  player.loadVideoById(QUEUE[current]);
+  updateUI();
+}}
 
-  function togglePause() {{
-    var frame = document.getElementById('player-frame');
-    var btn   = document.getElementById('btn-pp');
-    // Send postMessage to YT IFrame
-    var cmd = paused ? 'playVideo' : 'pauseVideo';
-    frame.contentWindow.postMessage(
-      JSON.stringify({{event:'command', func:cmd, args:[]}}),
-      '*'
-    );
-    paused = !paused;
-    btn.textContent = paused ? '▶ Play' : '⏸ Pause';
-  }}
+function updateUI() {{
+  document.getElementById('counter').textContent = (current+1) + ' / ' + QUEUE.length;
+  document.getElementById('qlabel').textContent  = 'Antrian — ' + QUEUE.length + ' video';
 
-  // Init
-  if(queue.length > 0) {{
-    loadTrack(current);
+  var html = '';
+  for (var i = 0; i < QUEUE.length; i++) {{
+    var cls  = i === current ? 'qitem active' : 'qitem';
+    var icon = i === current ? '<span class="play-ic">▶</span>' : '';
+    html += '<div class="' + cls + '" onclick="playTrack(' + i + ')">'
+          + '<span class="qnum">' + (i+1) + '</span>'
+          + icon
+          + '<span class="qurl">youtu.be/' + QUEUE[i] + '</span>'
+          + '</div>';
   }}
+  document.getElementById('queue-list').innerHTML = html;
+
+  // Scroll active item ke view
+  var el = document.querySelector('.qitem.active');
+  if (el) el.scrollIntoView({{block:'nearest', behavior:'smooth'}});
+}}
+
+updateUI();
 </script>
 </body>
-</html>
-"""
-    return html
+</html>"""
 
 
 # =========================================
 # SIDEBAR
 # =========================================
 with st.sidebar:
-    # Dark mode toggle
-    col_dm1, col_dm2 = st.columns([3, 2])
-    with col_dm1:
+    # Dark / Light toggle
+    dm_label = "🌙 Dark" if DM else "☀️ Light"
+    c1, c2 = st.columns([3, 2])
+    with c1:
         st.markdown(f"""
         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;
-                    color:{T['text2']};padding-top:6px;">
-            {'🌙 Dark Mode' if DM else '☀️ Light Mode'}
-        </div>
-        """, unsafe_allow_html=True)
-    with col_dm2:
-        if st.button("Toggle", key="toggle_dm", use_container_width=True):
+                    color:{T['text2']};padding-top:7px;font-weight:600;">
+            {dm_label} Mode
+        </div>""", unsafe_allow_html=True)
+    with c2:
+        if st.button("Toggle", key="dm_toggle", use_container_width=True):
             st.session_state.dark_mode = not st.session_state.dark_mode
             st.rerun()
 
-    st.markdown(f"<hr style='border-top:1px solid {T['border']};margin:10px 0'>", unsafe_allow_html=True)
+    st.markdown(f"<hr style='border-top:1px solid {T['border']};margin:10px 0'>",
+                unsafe_allow_html=True)
 
-    # YT section label
+    # YT label
     st.markdown(f"""
-    <div class="sb-yt-label"><span class="sb-bar"></span>🎵 Media Player</div>
-    """, unsafe_allow_html=True)
+    <div class="sb-section-title">
+        <span class="sb-red-bar"></span>🎵 Media Player
+    </div>""", unsafe_allow_html=True)
 
-    # Input
-    yt_url_sb = st.text_input(
-        "yt_sb",
-        placeholder="Paste link YouTube...",
-        label_visibility="collapsed",
-        key="yt_sb_input"
-    )
-
-    c1, c2 = st.columns([3, 2])
-    with c1:
-        add_yt = st.button("➕ Tambah", key="sb_add", use_container_width=True)
-    with c2:
+    # URL input + tombol tambah
+    yt_url_in = st.text_input("yt_in", placeholder="Paste link YouTube...",
+                               label_visibility="collapsed", key="yt_input")
+    cc1, cc2 = st.columns([3, 2])
+    with cc1:
+        btn_add   = st.button("➕ Tambah",  key="btn_add",   use_container_width=True)
+    with cc2:
         float_lbl = "✕ Float" if st.session_state.yt_float else "⧉ Float"
-        float_btn = st.button(float_lbl, key="sb_float", use_container_width=True)
+        btn_float = st.button(float_lbl, key="btn_float", use_container_width=True)
 
-    if add_yt and yt_url_sb.strip():
-        vid_id = extract_yt_id(yt_url_sb.strip())
-        if vid_id:
-            st.session_state.yt_queue.append(vid_id)
+    if btn_add and yt_url_in.strip():
+        vid = extract_yt_id(yt_url_in.strip())
+        if vid:
+            st.session_state.yt_queue.append(vid)
             st.session_state.yt_current = len(st.session_state.yt_queue) - 1
             st.rerun()
         else:
-            st.warning("Link tidak valid.")
+            st.warning("⚠️ Link tidak valid.")
 
-    if float_btn:
+    if btn_float:
         st.session_state.yt_float = not st.session_state.yt_float
         st.rerun()
 
-    # Clear queue
     if st.session_state.yt_queue:
-        if st.button("🗑 Hapus Semua", key="sb_clear", use_container_width=True):
+        if st.button("🗑 Hapus Semua", key="btn_clear_all", use_container_width=True):
             st.session_state.yt_queue   = []
             st.session_state.yt_current = 0
             st.rerun()
 
-    queue = st.session_state.yt_queue
-    idx   = st.session_state.yt_current
+    q   = st.session_state.yt_queue
+    idx = st.session_state.yt_current
 
-    if not queue:
-        st.markdown(f"""
-        <div class="yt-empty-sb">
-            🎵 Belum ada video<br>tambahkan link di atas
-        </div>
-        """, unsafe_allow_html=True)
+    if not q:
+        st.markdown("""
+        <div class="yt-empty">
+            🎵 Belum ada video<br>
+            <span style="opacity:.6">tambahkan link di atas</span>
+        </div>""", unsafe_allow_html=True)
+
     elif st.session_state.yt_float:
+        # Tampilkan info floating aktif
         st.markdown(f"""
-        <div style="background:{"rgba(59,130,246,0.15)" if DM else "#ede9fe"};
-                    border:1px solid {"#334155" if DM else "#c4b5fd"};
+        <div style="background:{"rgba(59,130,246,0.12)" if DM else "#eff6ff"};
+                    border:1px solid {"#1e3a5f" if DM else "#bfdbfe"};
                     border-radius:8px;padding:10px 12px;text-align:center;
                     font-family:'IBM Plex Mono',monospace;font-size:10px;
-                    color:{"#a78bfa" if DM else "#7c3aed"};margin-bottom:8px;">
-            ⧉ Floating aktif — {len(queue)} video
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        # Render inline sidebar player
-        html_player = render_yt_player(queue, idx, is_floating=False, dark=DM)
-        components.html(html_player, height=420, scrolling=False)
+                    color:{"#60a5fa" if DM else "#1d4ed8"};">
+            ⧉ Floating aktif<br>
+            <span style="opacity:.7">{len(q)} video di antrian</span>
+        </div>""", unsafe_allow_html=True)
 
-    st.markdown(f"<hr style='border-top:1px solid {T['border']};margin:10px 0'>", unsafe_allow_html=True)
+    else:
+        # Render player di sidebar
+        html = build_yt_player(q, idx, dark=DM, floating=False)
+        components.html(html, height=380, scrolling=False)
+
+    st.markdown(f"<hr style='border-top:1px solid {T['border']};margin:10px 0'>",
+                unsafe_allow_html=True)
 
 
 # =========================================
-# FLOATING PLAYER (injected in main area)
+# FLOATING PLAYER
 # =========================================
 if st.session_state.yt_float and st.session_state.yt_queue:
-    html_float = render_yt_player(
+    html_float = build_yt_player(
         st.session_state.yt_queue,
         st.session_state.yt_current,
-        is_floating=True,
-        dark=True  # floating selalu dark biar kontras
+        dark=True,
+        floating=True
     )
-    # Inject via st.markdown container — pakai components di posisi fixed
-    components.html(
-        f"""<div style="position:fixed;bottom:0;right:0;width:320px;height:480px;z-index:9998;pointer-events:none;">
-        <div style="pointer-events:all;">{html_float.replace("<!DOCTYPE html>","").replace("<html>","").replace("</html>","").replace("<head>","").replace("</head>","").replace("<body>","").replace("</body>","")}</div>
-        </div>""",
-        height=0,
-        scrolling=False
-    )
-    # Alternatif bersih: render sebagai overlay via full iframe
-    st.markdown(f"""
-    <div style="position:fixed;bottom:24px;right:24px;width:310px;z-index:9997;pointer-events:none;">
-    </div>
-    """, unsafe_allow_html=True)
+    # Render sebagai komponen fixed — height kecil, overflow visible via CSS position:fixed
+    components.html(html_float, height=420, scrolling=False)
 
 
 # =========================================
-# MAIN CONTENT — HEADER
+# MAIN — HEADER
 # =========================================
 st.markdown(f"""
 <div class="header-wrap">
@@ -530,9 +446,8 @@ st.markdown(f"""
         <h1 class="header-title">Portal Data Sekolah</h1>
         <p class="header-sub">Sistem pencarian instalasi berbasis NPSN</p>
     </div>
-    <span class="header-badge">NPSN LOOKUP v2.3</span>
-</div>
-""", unsafe_allow_html=True)
+    <span class="header-badge">NPSN LOOKUP v2.4</span>
+</div>""", unsafe_allow_html=True)
 
 # =========================================
 # FORM LOAD DATA
@@ -550,9 +465,7 @@ if load_button and sheet_url_input:
     st.session_state.active_sheet_url  = sheet_url_input
     st.session_state.last_refresh_time = time.time()
 
-# =========================================
-# URL BUILDER
-# =========================================
+
 def build_clean_export_url(url):
     if "docs.google.com" not in url:
         return url
@@ -562,9 +475,7 @@ def build_clean_export_url(url):
     except:
         return url
 
-# =========================================
-# CACHE 5 MENIT
-# =========================================
+
 @st.cache_data(ttl=300)
 def load_all_sheets(clean_url, refresh_token):
     excel = pd.ExcelFile(clean_url)
@@ -597,9 +508,7 @@ def load_all_sheets(clean_url, refresh_token):
             semua_data.append(h)
     return pd.concat(semua_data, ignore_index=True) if semua_data else pd.DataFrame()
 
-# =========================================
-# LOAD DATA + AUTO REFRESH
-# =========================================
+
 REFRESH_INTERVAL = 300
 
 if st.session_state.active_sheet_url:
@@ -625,8 +534,7 @@ if st.session_state.active_sheet_url:
         <span>Refresh: <b>{sisa//60:02d}:{sisa%60:02d}</b></span>
         &nbsp;|&nbsp;
         <span style="color:{T['accent']};font-weight:600">{pct}% cycle</span>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
     total_rows    = len(data)
     total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
@@ -652,10 +560,8 @@ if st.session_state.active_sheet_url:
             <div class="stat-value">{total_sheets}</div>
             <div class="stat-desc">sheet memiliki kolom NPSN</div></div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+    </div>""", unsafe_allow_html=True)
 
-    # ---- SEARCH ----
     st.markdown(f"""<div class="panel-title"><span class="bar"></span>🔍 Cari Data NPSN</div>""",
                 unsafe_allow_html=True)
 
@@ -672,8 +578,7 @@ if st.session_state.active_sheet_url:
             <div class="toast">
                 <div class="toast-title">✅ Data Berhasil Ditemukan!</div>
                 <div class="toast-body">NPSN <b>{base_npsn}</b> — {len(hasil)} instalasi</div>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
 
             st.markdown(f"""
             <div class="success-banner">
@@ -685,8 +590,7 @@ if st.session_state.active_sheet_url:
                         <b>{len(hasil)} instalasi</b> tersedia.
                     </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
 
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
             for grp, df_grp in hasil.groupby("group"):
@@ -694,8 +598,7 @@ if st.session_state.active_sheet_url:
                 <div class="result-header">
                     <span>🏫 NPSN {grp}</span>
                     <span class="result-badge">{len(df_grp)} instalasi</span>
-                </div>
-                """, unsafe_allow_html=True)
+                </div>""", unsafe_allow_html=True)
                 st.markdown('<div class="result-card">', unsafe_allow_html=True)
                 st.table(df_grp.drop(columns=["group"]))
                 st.markdown('</div>', unsafe_allow_html=True)
