@@ -97,29 +97,20 @@ st.markdown("""
 if "refresh_token" not in st.session_state:
     st.session_state.refresh_token = str(uuid.uuid4())
 
-if "last_sheet_url" not in st.session_state:
-    st.session_state.last_sheet_url = None
+if "active_sheet_url" not in st.session_state:
+    st.session_state.active_sheet_url = None
 
 # =========================================
-# INPUT
+# FORM LOAD DATA (FORCE REFRESH MESKI LINK SAMA)
 # =========================================
-colA, colB = st.columns([3,2])
+with st.form("sheet_form"):
+    sheet_url_input = st.text_input("Link Spreadsheet")
+    load_button = st.form_submit_button("Load / Refresh Data")
 
-with colA:
-    sheet_url = st.text_input("Link Spreadsheet", key="sheet_input")
-
-with colB:
-    npsn_input = st.text_input("Cari NPSN (Tekan Enter)", key="npsn_box")
-
-# =========================================
-# DETECT RE-SUBMIT LINK
-# =========================================
-if sheet_url:
-
-    if sheet_url != st.session_state.last_sheet_url:
-        # link berubah → buat token baru
-        st.session_state.refresh_token = str(uuid.uuid4())
-        st.session_state.last_sheet_url = sheet_url
+if load_button and sheet_url_input:
+    # setiap klik tombol → buat token baru
+    st.session_state.refresh_token = str(uuid.uuid4())
+    st.session_state.active_sheet_url = sheet_url_input
 
 # =========================================
 # CACHE TTL 1 JAM + VERSION KEY
@@ -176,17 +167,21 @@ def load_all_sheets(url, refresh_token):
     return pd.DataFrame()
 
 # =========================================
-# LOAD DATA
+# LOAD DATA JIKA SUDAH DI-ACTIVE-KAN
 # =========================================
-if sheet_url:
+if st.session_state.active_sheet_url:
 
-    data = load_all_sheets(sheet_url, st.session_state.refresh_token)
+    data = load_all_sheets(
+        st.session_state.active_sheet_url,
+        st.session_state.refresh_token
+    )
 
     st.markdown(
         f'<div class="update-indicator">Sinkronisasi terakhir: {datetime.now().strftime("%H:%M:%S")}</div>',
         unsafe_allow_html=True
     )
 
+    # STAT CARDS
     col1,col2,col3 = st.columns(3)
 
     with col1:
@@ -202,6 +197,8 @@ if sheet_url:
     # =========================================
     # SEARCH
     # =========================================
+    npsn_input = st.text_input("Cari NPSN (Tekan Enter)", key="npsn_box")
+
     if npsn_input:
 
         base_npsn = str(npsn_input).strip().split("_")[0]
