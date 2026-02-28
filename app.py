@@ -7,367 +7,368 @@ import time
 # =========================================
 # CONFIG
 # =========================================
-st.set_page_config(
-    page_title="Portal Data Sekolah",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
 # =========================================
 # STYLE
 # =========================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; }
 
-html, body, .stApp {
-    background: #F7F8FA;
-    font-family: 'DM Sans', sans-serif;
-    color: #1C1C28;
+.stApp {
+    background: #0d1117;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: #c9d1d9;
 }
 
-#MainMenu, footer, header { visibility: hidden; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #161b22; }
+::-webkit-scrollbar-thumb { background: #1e6fd6; border-radius: 3px; }
 
-.block-container {
-    padding: 0 !important;
-    max-width: 100% !important;
-}
-
-/* ── TOPBAR ── */
-.topbar {
-    background: #ffffff;
-    border-bottom: 1px solid #E8EAF0;
-    padding: 0 36px;
-    height: 56px;
+/* ---- HEADER ---- */
+.header-wrap {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    align-items: flex-end;
+    gap: 18px;
+    padding: 22px 28px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-left: 4px solid #1e6fd6;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
 }
 
-.topbar-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #3B6FE8;
+.header-wrap::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 100%;
+    background: linear-gradient(135deg, transparent 60%, rgba(30,111,214,0.07));
+    pointer-events: none;
 }
 
-.topbar-title {
-    font-size: 14px;
+.header-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
     font-weight: 600;
-    color: #1C1C28;
-    letter-spacing: -0.2px;
+    color: #f0f6fc;
+    letter-spacing: -0.5px;
+    margin: 0;
+    line-height: 1.2;
 }
 
-.topbar-sep {
-    width: 1px;
-    height: 16px;
-    background: #E8EAF0;
-}
-
-.topbar-sub {
+.header-sub {
     font-size: 12px;
-    color: #8B90A0;
-}
-
-.topbar-right {
-    margin-left: auto;
-    font-size: 12px;
-    color: #8B90A0;
-    font-family: 'DM Mono', monospace;
-}
-
-/* ── MAIN WRAPPER ── */
-.main-wrap {
-    padding: 28px 36px;
-    max-width: 1200px;
-}
-
-/* ── INPUT CARD ── */
-.input-card {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #E8EAF0;
-    padding: 20px 22px;
-    margin-bottom: 20px;
-}
-
-.input-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #8B90A0;
+    color: #6e7681;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.5px;
+    margin: 0;
     text-transform: uppercase;
-    letter-spacing: 1.2px;
-    margin-bottom: 10px;
 }
 
-/* ── STAT ROW ── */
+.header-badge {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #1e6fd6;
+    border: 1px solid #1e3a5f;
+    padding: 5px 12px;
+    border-radius: 2px;
+    background: rgba(30,111,214,0.08);
+    white-space: nowrap;
+}
+
+/* ---- STAT CARDS ---- */
 .stat-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
 }
 
 .stat-card {
-    flex: 1;
-    background: white;
-    border: 1px solid #E8EAF0;
-    border-radius: 10px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-top: 2px solid #1e6fd6;
     padding: 18px 20px;
+    border-radius: 4px;
+    position: relative;
 }
 
-.stat-num {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1C1C28;
-    letter-spacing: -1px;
-    font-family: 'DM Mono', monospace;
-    line-height: 1;
-    margin-bottom: 5px;
-}
+.stat-card.green { border-top-color: #238636; }
+.stat-card.purple { border-top-color: #8b5cf6; }
 
 .stat-label {
     font-size: 11px;
-    color: #8B90A0;
-    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6e7681;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 6px;
 }
 
-/* ── STATUS BAR ── */
-.status-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #F0F4FF;
-    border-radius: 7px;
-    padding: 7px 12px;
-    font-size: 11.5px;
-    color: #4A5080;
+.stat-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 30px;
+    font-weight: 600;
+    color: #f0f6fc;
+    line-height: 1;
+}
+
+.stat-desc {
+    font-size: 12px;
+    color: #484f58;
+    margin-top: 4px;
+}
+
+/* ---- FORM / INPUT OVERRIDE ---- */
+div[data-testid="stForm"] {
+    background: #161b22;
+    border: 1px solid #21262d;
+    padding: 20px;
+    border-radius: 4px;
     margin-bottom: 20px;
 }
 
-.live-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #3ECA7A;
-    flex-shrink: 0;
-    animation: blink 2s ease infinite;
+.stTextInput > div > div > input,
+.stTextInput > label + div > div > input {
+    background: #0d1117 !important;
+    border: 1px solid #30363d !important;
+    color: #c9d1d9 !important;
+    border-radius: 3px !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 13px !important;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+.stTextInput > div > div > input:focus {
+    border-color: #1e6fd6 !important;
+    box-shadow: 0 0 0 3px rgba(30,111,214,0.15) !important;
 }
 
-.status-bar strong { color: #1C1C28; font-weight: 600; }
-
-/* ── PROGRESS BAR ── */
-.prog-wrap {
-    flex: 1;
-    height: 2px;
-    background: #D8DEFF;
-    border-radius: 99px;
-    overflow: hidden;
-    margin-left: 4px;
-}
-.prog-fill {
-    height: 100%;
-    background: #3B6FE8;
-    border-radius: 99px;
-    animation: shrink 300s linear forwards;
-}
-@keyframes shrink {
-    from { width: 100%; }
-    to   { width: 0%; }
+.stTextInput > label {
+    color: #8b949e !important;
+    font-size: 12px !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
 }
 
-/* ── RESULT ── */
-.result-card {
-    background: white;
-    border: 1px solid #E8EAF0;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 16px;
+/* ---- BUTTON ---- */
+.stButton > button, .stFormSubmitButton > button {
+    background: #1e6fd6 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 3px !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    padding: 8px 20px !important;
+    transition: background 0.15s !important;
 }
 
-.result-card-header {
-    padding: 13px 18px;
-    border-bottom: 1px solid #E8EAF0;
+.stButton > button:hover, .stFormSubmitButton > button:hover {
+    background: #2680f0 !important;
+}
+
+/* ---- DIVIDER ---- */
+hr {
+    border: none;
+    border-top: 1px solid #21262d;
+    margin: 20px 0;
+}
+
+/* ---- SYNC BAR ---- */
+.sync-bar {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #FAFBFF;
-}
-
-.result-card-header .npsn-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    color: #3B6FE8;
-    background: #EEF3FF;
-    padding: 3px 10px;
-    border-radius: 5px;
-}
-
-.result-card-header .inst-count {
-    font-size: 12px;
-    color: #8B90A0;
-    margin-left: auto;
-}
-
-.result-card-meta {
-    padding: 8px 18px;
-    border-bottom: 1px solid #F0F2F8;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
-    color: #8B90A0;
-    display: flex;
-    gap: 16px;
+    color: #484f58;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 3px;
 }
 
-.result-card-meta b { color: #4A5080; }
+.sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #238636;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+}
 
-/* ── TABLE ── */
-table {
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+/* ---- RESULT SECTION ---- */
+.result-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f0f6fc;
+    margin-top: 18px;
+}
+
+.result-badge {
+    font-size: 10px;
+    background: rgba(30,111,214,0.15);
+    color: #1e6fd6;
+    border: 1px solid #1e3a5f;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.result-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 0 0 4px 4px;
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+/* ---- TABLE ---- */
+.stTable, table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 12.5px !important;
-    font-family: 'DM Sans', sans-serif !important;
+    font-size: 12px !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+}
+
+thead tr {
+    background: #0d1117 !important;
 }
 
 thead th {
-    background: #FAFBFF !important;
-    color: #8B90A0 !important;
-    font-weight: 600 !important;
+    color: #6e7681 !important;
     font-size: 11px !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.7px !important;
-    padding: 9px 14px !important;
-    border-bottom: 1px solid #E8EAF0 !important;
+    letter-spacing: 0.8px !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #21262d !important;
     white-space: nowrap !important;
-    text-align: left !important;
+}
+
+tbody tr {
+    border-bottom: 1px solid #161b22 !important;
+    transition: background 0.1s !important;
+}
+
+tbody tr:hover {
+    background: rgba(30,111,214,0.05) !important;
 }
 
 tbody td {
     padding: 9px 14px !important;
-    border-bottom: 1px solid #F4F5F8 !important;
-    color: #1C1C28 !important;
+    color: #c9d1d9 !important;
     white-space: normal !important;
     word-break: break-word !important;
+    border: none !important;
 }
 
-tbody tr:last-child td { border-bottom: none !important; }
-tbody tr:hover td { background: #FAFBFF !important; }
-
-/* ── NOT FOUND ── */
-.not-found {
-    background: white;
-    border: 1px solid #E8EAF0;
-    border-radius: 10px;
-    padding: 28px;
-    text-align: center;
-    color: #8B90A0;
-}
-.not-found .icon { font-size: 32px; margin-bottom: 8px; }
-.not-found h4 { color: #1C1C28; font-size: 14px; margin-bottom: 4px; }
-.not-found p { font-size: 12px; }
-
-/* ── TOAST ── */
+/* ---- TOAST ---- */
 .toast {
     position: fixed;
-    top: 70px;
-    right: 24px;
-    background: #1C1C28;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    top: 22px;
+    right: 22px;
+    background: #161b22;
+    border: 1px solid #238636;
+    border-left: 3px solid #238636;
+    color: #f0f6fc;
+    padding: 14px 20px;
+    border-radius: 4px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
     z-index: 9999;
-    animation: tin 0.3s ease, tout 0.3s ease 4s forwards;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    animation: toastIn 0.3s ease, toastOut 0.4s ease 4.5s forwards;
+    min-width: 240px;
 }
 
-.toast-icon {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #3ECA7A;
+.toast-title {
+    font-weight: 600;
+    color: #3fb950;
+    margin-bottom: 4px;
+}
+
+.toast-body { color: #8b949e; }
+
+@keyframes toastIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes toastOut {
+    to { transform: translateX(120%); opacity: 0; }
+}
+
+/* ---- WARNING / INFO ---- */
+.stWarning {
+    background: #161b22 !important;
+    border: 1px solid #4d2e00 !important;
+    color: #d29922 !important;
+    border-radius: 3px !important;
+}
+
+/* ---- REFRESH COUNTDOWN ---- */
+.refresh-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
-    flex-shrink: 0;
+    color: #484f58;
+    margin-bottom: 16px;
 }
 
-.toast small { display: block; color: #8B90A0; font-size: 11px; font-weight: 400; }
-
-@keyframes tin  { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
-@keyframes tout { to   { opacity:0; transform: translateY(-8px); } }
-
-/* ── STREAMLIT OVERRIDES ── */
-.stTextInput input {
-    border: 1px solid #E8EAF0 !important;
-    border-radius: 7px !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 13px !important;
-    padding: 9px 13px !important;
-    background: #FAFBFF !important;
-    color: #1C1C28 !important;
-    transition: border-color 0.15s !important;
-}
-.stTextInput input:focus {
-    border-color: #3B6FE8 !important;
-    box-shadow: 0 0 0 3px rgba(59,111,232,0.1) !important;
-}
-.stTextInput label { font-size: 12px !important; color: #8B90A0 !important; }
-
-.stButton button {
-    background: #1C1C28 !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 7px !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-weight: 500 !important;
-    font-size: 13px !important;
-    padding: 9px 20px !important;
-    transition: opacity 0.15s !important;
-}
-.stButton button:hover { opacity: 0.8 !important; }
-
-[data-testid="stForm"] {
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    background: transparent !important;
+.refresh-prog {
+    flex: 1;
+    height: 2px;
+    background: #21262d;
+    border-radius: 1px;
+    margin: 0 12px;
+    overflow: hidden;
 }
 
-.stAlert { border-radius: 8px !important; }
-
-/* ── EXPANDER (media player) ── */
-.streamlit-expanderHeader {
-    background: white !important;
-    border: 1px solid #E8EAF0 !important;
-    border-radius: 10px !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    color: #1C1C28 !important;
-    padding: 12px 16px !important;
-}
-.streamlit-expanderContent {
-    background: white !important;
-    border: 1px solid #E8EAF0 !important;
-    border-top: none !important;
-    border-radius: 0 0 10px 10px !important;
-    padding: 12px 16px 16px !important;
+.refresh-fill {
+    height: 100%;
+    background: #1e6fd6;
+    border-radius: 1px;
+    transition: width 1s linear;
 }
 </style>
+""", unsafe_allow_html=True)
+
+# =========================================
+# HEADER
+# =========================================
+st.markdown("""
+<div class="header-wrap">
+    <div>
+        <p class="header-sub">// sistem informasi</p>
+        <h1 class="header-title">Portal Data Sekolah</h1>
+    </div>
+    <span class="header-badge">NPSN LOOKUP v2.0</span>
+</div>
 """, unsafe_allow_html=True)
 
 # =========================================
@@ -375,70 +376,24 @@ tbody tr:hover td { background: #FAFBFF !important; }
 # =========================================
 if "refresh_token" not in st.session_state:
     st.session_state.refresh_token = str(uuid.uuid4())
+
 if "active_sheet_url" not in st.session_state:
     st.session_state.active_sheet_url = None
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = datetime.now()
+
+if "last_refresh_time" not in st.session_state:
+    st.session_state.last_refresh_time = time.time()
 
 # =========================================
-# TOPBAR
+# FORM LOAD DATA
 # =========================================
-st.markdown(f"""
-<div class="topbar">
-    <div class="topbar-dot"></div>
-    <div class="topbar-title">Portal Data Sekolah</div>
-    <div class="topbar-sep"></div>
-    <div class="topbar-sub">Sistem Pencarian NPSN</div>
-    <div class="topbar-right">{datetime.now().strftime("%d %b %Y, %H:%M")}</div>
-</div>
-""", unsafe_allow_html=True)
+with st.form("sheet_form"):
+    sheet_url_input = st.text_input("Link Google Spreadsheet")
+    load_button = st.form_submit_button("▶  Load / Refresh Data")
 
-st.markdown('<div class="main-wrap">', unsafe_allow_html=True)
-
-# =========================================
-# YOUTUBE PLAYER
-# =========================================
-def extract_yt_id(url):
-    """Extract YouTube video ID from various URL formats."""
-    import re
-    patterns = [
-        r'(?:v=|\/)([0-9A-Za-z_-]{11}).*',
-        r'(?:youtu\.be\/)([0-9A-Za-z_-]{11})',
-        r'(?:embed\/)([0-9A-Za-z_-]{11})',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, url)
-        if match:
-            return match.group(1)
-    return None
-
-with st.expander("🎵  Media Player", expanded=False):
-    yt_url = st.text_input(
-        "yt_url",
-        placeholder="Paste link YouTube di sini...",
-        label_visibility="collapsed",
-        key="yt_input"
-    )
-    if yt_url:
-        vid_id = extract_yt_id(yt_url)
-        if vid_id:
-            st.markdown(f"""
-            <div style="border-radius:10px;overflow:hidden;margin-top:10px;border:1px solid #E8EAF0;">
-                <iframe
-                    width="100%"
-                    height="220"
-                    src="https://www.youtube.com/embed/{vid_id}?autoplay=1&rel=0"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                    style="display:block;"
-                ></iframe>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.warning("URL tidak dikenali. Pastikan link YouTube valid.")
-
-st.markdown("<div style='margin-bottom:4px'></div>", unsafe_allow_html=True)
+if load_button and sheet_url_input:
+    st.session_state.refresh_token = str(uuid.uuid4())
+    st.session_state.active_sheet_url = sheet_url_input
+    st.session_state.last_refresh_time = time.time()
 
 # =========================================
 # URL BUILDER
@@ -453,7 +408,7 @@ def build_clean_export_url(url):
         return url
 
 # =========================================
-# LOAD DATA (cache 5 menit)
+# CACHE TTL 5 MENIT
 # =========================================
 @st.cache_data(ttl=300)
 def load_all_sheets(clean_url, refresh_token):
@@ -470,17 +425,22 @@ def load_all_sheets(clean_url, refresh_token):
                 break
         if header_row is None:
             return None
+
         df = raw.iloc[header_row + 1:].copy()
-        df.columns = (
-            raw.iloc[header_row]
-            .astype(str).str.lower().str.strip().str.replace(" ", "_")
-        )
+        df.columns = (raw.iloc[header_row]
+                      .astype(str)
+                      .str.lower()
+                      .str.strip()
+                      .str.replace(" ", "_"))
+
         for c in df.columns:
             if "npsn" in c:
                 df = df.rename(columns={c: "npsn"})
                 break
+
         if "npsn" not in df.columns:
             return None
+
         df["source_sheet"] = sheet_name
         return df.reset_index(drop=True)
 
@@ -489,151 +449,112 @@ def load_all_sheets(clean_url, refresh_token):
         if hasil is not None:
             semua_data.append(hasil)
 
-    return pd.concat(semua_data, ignore_index=True) if semua_data else pd.DataFrame()
+    if semua_data:
+        return pd.concat(semua_data, ignore_index=True)
+    return pd.DataFrame()
 
 # =========================================
-# FORM LOAD DATA
+# LOAD DATA + AUTO REFRESH
 # =========================================
-st.markdown('<div class="input-card">', unsafe_allow_html=True)
-st.markdown('<div class="input-label">Sumber Data</div>', unsafe_allow_html=True)
+REFRESH_INTERVAL = 300  # 5 menit
 
-with st.form("sheet_form"):
-    col_url, col_btn = st.columns([5, 1])
-    with col_url:
-        sheet_url_input = st.text_input(
-            "url",
-            placeholder="Tempel URL Google Spreadsheet di sini...",
-            label_visibility="collapsed"
-        )
-    with col_btn:
-        load_button = st.form_submit_button("Muat Data")
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-if load_button and sheet_url_input:
-    st.session_state.refresh_token = str(uuid.uuid4())
-    st.session_state.active_sheet_url = sheet_url_input
-    st.session_state.last_refresh = datetime.now()
-
-# =========================================
-# MAIN CONTENT
-# =========================================
 if st.session_state.active_sheet_url:
+
     clean_url = build_clean_export_url(st.session_state.active_sheet_url)
 
-    try:
-        data = load_all_sheets(clean_url, st.session_state.refresh_token)
+    # --- Cek apakah sudah waktunya auto-refresh ---
+    elapsed = time.time() - st.session_state.last_refresh_time
+    if elapsed >= REFRESH_INTERVAL:
+        st.session_state.refresh_token = str(uuid.uuid4())
+        st.session_state.last_refresh_time = time.time()
+        elapsed = 0
 
-        # ── Status bar ──
-        elapsed = int((datetime.now() - st.session_state.last_refresh).total_seconds())
-        next_refresh = max(0, 300 - elapsed)
-        m, s = divmod(next_refresh, 60)
+    data = load_all_sheets(clean_url, st.session_state.refresh_token)
 
-        st.markdown(f"""
-        <div class="status-bar">
-            <div class="live-dot"></div>
-            Terakhir dimuat: <strong>{st.session_state.last_refresh.strftime("%H:%M:%S")}</strong>
-            &nbsp;·&nbsp; Refresh dalam: <strong>{m}m {s:02d}s</strong>
-            <div class="prog-wrap"><div class="prog-fill"></div></div>
-        </div>
-        """, unsafe_allow_html=True)
+    # --- Sync bar ---
+    now_str = datetime.now().strftime("%H:%M:%S")
+    sisa = max(0, int(REFRESH_INTERVAL - elapsed))
+    menit = sisa // 60
+    detik = sisa % 60
+    pct = int((elapsed / REFRESH_INTERVAL) * 100)
 
-        # ── Stat cards ──
-        total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown(f"""
-            <div class="stat-card">
-                <div class="stat-num">{len(data):,}</div>
-                <div class="stat-label">Total Baris</div>
-            </div>""", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""
-            <div class="stat-card">
-                <div class="stat-num">{total_sekolah:,}</div>
-                <div class="stat-label">Total Sekolah</div>
-            </div>""", unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"""
-            <div class="stat-card">
-                <div class="stat-num">{data["source_sheet"].nunique()}</div>
-                <div class="stat-label">Sheet Aktif</div>
-            </div>""", unsafe_allow_html=True)
-
-        st.markdown("<div style='margin-bottom:20px'></div>", unsafe_allow_html=True)
-
-        # ── Search ──
-        st.markdown('<div class="input-card">', unsafe_allow_html=True)
-        st.markdown('<div class="input-label">Cari NPSN</div>', unsafe_allow_html=True)
-        npsn_input = st.text_input(
-            "npsn",
-            placeholder="Masukkan nomor NPSN, contoh: 20123456",
-            key="npsn_box",
-            label_visibility="collapsed"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        if npsn_input:
-            base_npsn = str(npsn_input).strip().split("_")[0]
-            hasil = data[
-                data["npsn"].astype(str).str.strip().str.startswith(base_npsn)
-            ]
-
-            if len(hasil) > 0:
-                st.markdown(f"""
-                <div class="toast">
-                    <div class="toast-icon">✓</div>
-                    <div>
-                        NPSN {base_npsn} ditemukan
-                        <small>{len(hasil)} instalasi tercatat</small>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-                hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
-
-                for grp, df_grp in hasil.groupby("group"):
-                    sheets_used = " · ".join(df_grp["source_sheet"].unique())
-                    df_display = df_grp.drop(columns=["group"])
-
-                    st.markdown(f"""
-                    <div class="result-card">
-                        <div class="result-card-header">
-                            <span class="npsn-tag">{grp}</span>
-                            <span class="inst-count">{len(df_grp)} instalasi</span>
-                        </div>
-                        <div class="result-card-meta">
-                            Sheet: <b>{sheets_used}</b>
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.table(df_display)
-
-            else:
-                st.markdown(f"""
-                <div class="not-found">
-                    <div class="icon">🔍</div>
-                    <h4>Data tidak ditemukan</h4>
-                    <p>NPSN <strong>{base_npsn}</strong> tidak ada dalam database. Periksa kembali nomor yang dimasukkan.</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-    except Exception as e:
-        st.error(f"Gagal memuat data: {e}")
-
-    # ── Auto-refresh setiap 5 menit ──
-    time.sleep(300)
-    st.session_state.refresh_token = str(uuid.uuid4())
-    st.session_state.last_refresh = datetime.now()
-    st.rerun()
-
-else:
-    st.markdown("""
-    <div class="not-found" style="padding:40px">
-        <div class="icon">📋</div>
-        <h4>Belum ada data</h4>
-        <p>Masukkan URL Google Spreadsheet di atas untuk mulai memuat data.</p>
+    st.markdown(f"""
+    <div class="sync-bar">
+        <span class="sync-dot"></span>
+        LIVE — Sinkronisasi terakhir: {now_str}
+        &nbsp;|&nbsp;
+        Refresh berikutnya: {menit:02d}:{detik:02d}
+        &nbsp;|&nbsp;
+        <span style="color:#1e6fd6">{pct}% cycle</span>
     </div>
     """, unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
+    # --- Stat Cards ---
+    total_rows = len(data)
+    total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
+    total_sheets = data["source_sheet"].nunique()
+
+    st.markdown(f"""
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="stat-label">Total Baris</div>
+            <div class="stat-value">{total_rows:,}</div>
+            <div class="stat-desc">semua sheet gabungan</div>
+        </div>
+        <div class="stat-card green">
+            <div class="stat-label">Total Sekolah</div>
+            <div class="stat-value">{total_sekolah:,}</div>
+            <div class="stat-desc">unique NPSN terdeteksi</div>
+        </div>
+        <div class="stat-card purple">
+            <div class="stat-label">Sheet Aktif</div>
+            <div class="stat-value">{total_sheets}</div>
+            <div class="stat-desc">sheet memiliki kolom NPSN</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # =========================================
+    # SEARCH
+    # =========================================
+    npsn_input = st.text_input("Cari NPSN", placeholder="Masukkan NPSN lalu tekan Enter...", key="npsn_box")
+
+    if npsn_input:
+        base_npsn = str(npsn_input).strip().split("_")[0]
+
+        hasil = data[
+            data["npsn"]
+            .astype(str)
+            .str.strip()
+            .str.startswith(base_npsn)
+        ]
+
+        if len(hasil) > 0:
+            st.markdown(f"""
+            <div class="toast">
+                <div class="toast-title">✓ NPSN Ditemukan</div>
+                <div class="toast-body">NPSN {base_npsn} — {len(hasil)} instalasi</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
+
+            for grp, df_grp in hasil.groupby("group"):
+                st.markdown(f"""
+                <div class="result-header">
+                    <span>🏫 NPSN {grp}</span>
+                    <span class="result-badge">{len(df_grp)} instalasi</span>
+                </div>
+                """, unsafe_allow_html=True)
+                st.markdown('<div class="result-card">', unsafe_allow_html=True)
+                st.table(df_grp.drop(columns=["group"]))
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        else:
+            st.warning(f"NPSN **{base_npsn}** tidak ditemukan dalam database.")
+
+    # =========================================
+    # AUTO RERUN setiap 30 detik untuk update countdown
+    # =========================================
+    time.sleep(30)
+    st.rerun()
