@@ -691,6 +691,57 @@ if st.session_state.active_sheet_url:
         </div>
     </div>""", unsafe_allow_html=True)
 
+    # =========================================
+    # HELPER — render DataFrame sebagai HTML tabel
+    # NO horizontal scroll, teks wrap, semua kolom muat
+    # =========================================
+    def df_to_html(df: pd.DataFrame, dark: bool) -> str:
+        bg       = "#1e293b"   if dark else "#ffffff"
+        bg2      = "#111827"   if dark else "#e0e7ff"
+        bdr      = "#334155"   if dark else "#c7d2fe"
+        txt      = "#f1f5f9"   if dark else "#1e1b4b"
+        txt_hdr  = "#818cf8"   if dark else "#4338ca"
+        row_alt  = "#273449"   if dark else "#f5f7ff"
+        row_hov  = "#1e3a5f"   if dark else "#eef2ff"
+        acc      = "#6366f1"   if dark else "#4f46e5"
+
+        # build header
+        cols = df.columns.tolist()
+        ths  = "".join(
+            f'<th style="padding:9px 11px;background:{bg2};color:{txt_hdr};'
+            f'font-size:10px;font-family:JetBrains Mono,monospace;text-transform:uppercase;'
+            f'letter-spacing:.9px;font-weight:600;border-bottom:2px solid {acc};'
+            f'white-space:nowrap;text-align:left">{c.replace("_"," ")}</th>'
+            for c in cols
+        )
+
+        # build rows
+        rows_html = ""
+        for i, (_, row) in enumerate(df.iterrows()):
+            bg_row = bg if i % 2 == 0 else row_alt
+            tds = "".join(
+                f'<td style="padding:8px 11px;color:{txt};font-size:12px;'
+                f'font-family:Space Grotesk,sans-serif;border-bottom:1px solid {bdr};'
+                f'word-break:break-word;white-space:normal;vertical-align:top;'
+                f'max-width:200px">{str(v) if pd.notna(v) else ""}</td>'
+                for v in row
+            )
+            rows_html += (
+                f'<tr style="background:{bg_row}" '
+                f'onmouseover="this.style.background=\'{row_hov}\'" '
+                f'onmouseout="this.style.background=\'{bg_row}\'">{tds}</tr>'
+            )
+
+        return f"""
+        <div style="overflow:visible;width:100%">
+        <table style="width:100%;border-collapse:collapse;table-layout:fixed;
+                      background:{bg};border-radius:0 0 12px 12px;overflow:hidden">
+          <colgroup>{"<col>" * len(cols)}</colgroup>
+          <thead><tr>{ths}</tr></thead>
+          <tbody>{rows_html}</tbody>
+        </table>
+        </div>"""
+
     # ---- SEARCH ----
     st.markdown(f"""<div class="panel-title"><span class="bar"></span>🔍 Cari Data NPSN</div>""",
                 unsafe_allow_html=True)
@@ -727,12 +778,14 @@ if st.session_state.active_sheet_url:
                 <div class="notif-badge">✓ {len(hasil)} Data</div>
             </div>""", unsafe_allow_html=True)
 
+            hasil = hasil.copy()
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
             for grp, df_grp in hasil.groupby("group"):
                 sheets_info = " · ".join(df_grp["source_sheet"].unique())
-                df_display  = df_grp.drop(columns=["group"])
+                df_display  = df_grp.drop(columns=["group"]).reset_index(drop=True)
 
+                # Header card
                 st.markdown(f"""
                 <div class="result-wrap">
                     <div class="result-hdr">
@@ -740,10 +793,8 @@ if st.session_state.active_sheet_url:
                         <span class="result-badge">{len(df_grp)} instalasi</span>
                         <span class="result-sheet-info">📄 {sheets_info}</span>
                     </div>
+                    {df_to_html(df_display, DM)}
                 </div>""", unsafe_allow_html=True)
-
-                # st.table — no scroll, semua baris tampil sepenuhnya
-                st.table(df_display)
 
         else:
             st.markdown(f"""
@@ -764,4 +815,3 @@ else:
         <h4>Belum Ada Data</h4>
         <p>Masukkan URL Google Spreadsheet di atas lalu klik <b>Load / Refresh Data</b>.</p>
     </div>""", unsafe_allow_html=True)
-    
