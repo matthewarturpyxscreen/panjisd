@@ -101,27 +101,38 @@ if "active_sheet_url" not in st.session_state:
     st.session_state.active_sheet_url = None
 
 # =========================================
-# FORM LOAD DATA (FORCE REFRESH MESKI LINK SAMA)
+# FORM LOAD DATA
 # =========================================
 with st.form("sheet_form"):
     sheet_url_input = st.text_input("Link Spreadsheet")
     load_button = st.form_submit_button("Load / Refresh Data")
 
 if load_button and sheet_url_input:
-    # setiap klik tombol → buat token baru
     st.session_state.refresh_token = str(uuid.uuid4())
     st.session_state.active_sheet_url = sheet_url_input
+
+# =========================================
+# CLEAN GOOGLE EXPORT URL BUILDER
+# =========================================
+def build_clean_export_url(url):
+
+    if "docs.google.com" not in url:
+        return url
+
+    try:
+        sheet_id = url.split("/d/")[1].split("/")[0]
+        clean_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx"
+        return clean_url
+    except:
+        return url
 
 # =========================================
 # CACHE TTL 1 JAM + VERSION KEY
 # =========================================
 @st.cache_data(ttl=3600)
-def load_all_sheets(url, refresh_token):
+def load_all_sheets(clean_url, refresh_token):
 
-    if "docs.google.com" in url:
-        url = url.replace("/edit?usp=sharing","/export?format=xlsx")
-
-    excel = pd.ExcelFile(url)
+    excel = pd.ExcelFile(clean_url)
     semua_data=[]
 
     def auto_read(sheet_name):
@@ -167,12 +178,14 @@ def load_all_sheets(url, refresh_token):
     return pd.DataFrame()
 
 # =========================================
-# LOAD DATA JIKA SUDAH DI-ACTIVE-KAN
+# LOAD DATA
 # =========================================
 if st.session_state.active_sheet_url:
 
+    clean_url = build_clean_export_url(st.session_state.active_sheet_url)
+
     data = load_all_sheets(
-        st.session_state.active_sheet_url,
+        clean_url,
         st.session_state.refresh_token
     )
 
@@ -181,7 +194,6 @@ if st.session_state.active_sheet_url:
         unsafe_allow_html=True
     )
 
-    # STAT CARDS
     col1,col2,col3 = st.columns(3)
 
     with col1:
