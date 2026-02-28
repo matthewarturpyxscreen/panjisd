@@ -659,4 +659,3 @@ else:
         <h4>Belum ada data</h4>
         <p>Masukkan URL Google Spreadsheet di atas untuk mulai memuat data.</p>
     </div>""", unsafe_allow_html=True)
-
