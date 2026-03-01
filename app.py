@@ -63,11 +63,7 @@ T = {
 # =========================================
 # STYLE
 # =========================================
-# CSS hanya di-inject ulang kalau dark mode berubah
-_css_key = f"css_{DM}"
-if st.session_state.get("injected_css") != _css_key:
-    st.session_state.injected_css = _css_key
-    st.markdown(f"""
+st.markdown(f"""
 <style>
 /* fonts loaded via <link> preconnect di bawah */
 *,*::before,*::after{{box-sizing:border-box}}
@@ -731,7 +727,6 @@ if st.session_state.active_sheet_url:
 
     # =========================================
     # HELPER — render DataFrame sebagai HTML tabel
-    # NO horizontal scroll, teks wrap, semua kolom muat
     # =========================================
     def df_to_html(df: pd.DataFrame, dark: bool) -> str:
         bg      = "#1e293b" if dark else "#ffffff"
@@ -847,8 +842,6 @@ if st.session_state.active_sheet_url:
                 <p>NPSN <b>{base_npsn}</b> tidak ada dalam database saat ini.<br>
                 Periksa kembali nomor NPSN yang dimasukkan.</p>
             </div>""", unsafe_allow_html=True)
-
-
 
 else:
     st.markdown(f"""
