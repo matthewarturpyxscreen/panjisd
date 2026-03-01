@@ -758,14 +758,16 @@ if st.session_state.active_sheet_url:
         ths = "".join(f"<th>{c.replace('_',' ')}</th>" for c in cols)
 
         records   = df.fillna("").astype(str).to_dict("records")
-        rows_html = "".join(
-            f'<tr class="{"even" if i%2==0 else "odd"}>{"".join(f"<td>{v}</td>" for v in r.values())}</tr>'
-            for i, r in enumerate(records)
-        )
+        rows_parts = []
+        for i, r in enumerate(records):
+            cls  = "even" if i % 2 == 0 else "odd"
+            tds  = "".join(f"<td>{v}</td>" for v in r.values())
+            rows_parts.append(f'<tr class="{cls}">{tds}</tr>')
+        rows_html = "".join(rows_parts)
 
-        return f"""{style}<div style="overflow:visible;width:100%">
-        <table class="t{uid}"><thead><tr>{ths}</tr></thead><tbody>{rows_html}</tbody></table>
-        </div>"""
+        return (f'{style}<div style="overflow:visible;width:100%">' +
+                f'<table class="t{uid}"><thead><tr>{ths}</tr></thead>' +
+                f'<tbody>{rows_html}</tbody></table></div>')
 
     # ---- SEARCH ----
     st.markdown(f"""<div class="panel-title"><span class="bar"></span>🔍 Cari Data NPSN</div>""",
