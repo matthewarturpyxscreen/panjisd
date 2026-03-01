@@ -805,8 +805,9 @@ if st.session_state.active_sheet_url:
                 Periksa kembali nomor NPSN yang dimasukkan.</p>
             </div>""", unsafe_allow_html=True)
 
-    time.sleep(30)
-    st.rerun()
+    # Auto-refresh hanya saat interval sudah habis
+    if elapsed >= REFRESH_INTERVAL - 1:
+        st.rerun()
 
 else:
     st.markdown(f"""
