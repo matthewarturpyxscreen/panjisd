@@ -53,7 +53,7 @@ T = {
 # ─────────────────────────────────────────
 # CSS
 # ─────────────────────────────────────────
-st.markdown(f"""
+st.html(f"""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -149,7 +149,7 @@ div[data-testid="stForm"]{{background:transparent!important;border:none!importan
 .dm-lbl{{font-family:'JetBrains Mono',monospace;font-size:11px;color:{T['text2']};font-weight:600}}
 hr{{border:none;border-top:1px solid {T['border']};margin:12px 0}}
 </style>
-""", unsafe_allow_html=True)
+""")
 
 
 # ─────────────────────────────────────────
