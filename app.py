@@ -63,7 +63,11 @@ T = {
 # =========================================
 # STYLE
 # =========================================
-st.markdown(f"""
+# CSS hanya di-inject ulang kalau dark mode berubah
+_css_key = f"css_{DM}"
+if st.session_state.get("injected_css") != _css_key:
+    st.session_state.injected_css = _css_key
+    st.markdown(f"""
 <style>
 /* fonts loaded via <link> preconnect di bawah */
 *,*::before,*::after{{box-sizing:border-box}}
@@ -730,51 +734,42 @@ if st.session_state.active_sheet_url:
     # NO horizontal scroll, teks wrap, semua kolom muat
     # =========================================
     def df_to_html(df: pd.DataFrame, dark: bool) -> str:
-        bg       = "#1e293b"   if dark else "#ffffff"
-        bg2      = "#111827"   if dark else "#e0e7ff"
-        bdr      = "#334155"   if dark else "#c7d2fe"
-        txt      = "#f1f5f9"   if dark else "#1e1b4b"
-        txt_hdr  = "#818cf8"   if dark else "#4338ca"
-        row_alt  = "#273449"   if dark else "#f5f7ff"
-        row_hov  = "#1e3a5f"   if dark else "#eef2ff"
-        acc      = "#6366f1"   if dark else "#4f46e5"
+        bg      = "#1e293b" if dark else "#ffffff"
+        bg2     = "#111827" if dark else "#e0e7ff"
+        bdr     = "#334155" if dark else "#c7d2fe"
+        txt     = "#f1f5f9" if dark else "#1e1b4b"
+        th_c    = "#818cf8" if dark else "#4338ca"
+        row_alt = "#273449" if dark else "#f5f7ff"
+        row_hov = "#1e3a5f" if dark else "#eef2ff"
+        acc     = "#6366f1" if dark else "#4f46e5"
 
-        # build header
+        uid  = id(df)  # unique per call
         cols = df.columns.tolist()
-        ths  = "".join(
-            f'<th style="padding:9px 11px;background:{bg2};color:{txt_hdr};'
-            f'font-size:10px;font-family:JetBrains Mono,monospace;text-transform:uppercase;'
-            f'letter-spacing:.9px;font-weight:600;border-bottom:2px solid {acc};'
-            f'white-space:nowrap;text-align:left">{c.replace("_"," ")}</th>'
-            for c in cols
+
+        # Style sekali di <style> tag — bukan inline per cell (jauh lebih kecil HTML-nya)
+        style = f"""<style>
+        .t{uid}{{width:100%;border-collapse:collapse;table-layout:fixed;background:{bg}}}
+        .t{uid} th{{padding:9px 11px;background:{bg2};color:{th_c};font-size:10px;
+            font-family:JetBrains Mono,monospace;text-transform:uppercase;letter-spacing:.9px;
+            font-weight:600;border-bottom:2px solid {acc};white-space:nowrap;text-align:left}}
+        .t{uid} td{{padding:8px 11px;color:{txt};font-size:12px;font-family:Space Grotesk,sans-serif;
+            border-bottom:1px solid {bdr};word-break:break-word;white-space:normal;
+            vertical-align:top;max-width:180px}}
+        .t{uid} tr.even{{background:{bg}}}
+        .t{uid} tr.odd{{background:{row_alt}}}
+        .t{uid} tr:hover td{{background:{row_hov}}}
+        </style>"""
+
+        ths = "".join(f"<th>{c.replace('_',' ')}</th>" for c in cols)
+
+        records   = df.fillna("").astype(str).to_dict("records")
+        rows_html = "".join(
+            f'<tr class="{"even" if i%2==0 else "odd"}>{"".join(f"<td>{v}</td>" for v in r.values())}</tr>'
+            for i, r in enumerate(records)
         )
 
-        # build rows — pakai to_dict jauh lebih cepat dari iterrows
-        records = df.fillna("").astype(str).to_dict("records")
-        rows_html = ""
-        for i, row in enumerate(records):
-            bg_row = bg if i % 2 == 0 else row_alt
-            tds = "".join(
-                f'<td style="padding:8px 11px;color:{txt};font-size:12px;'
-                f'font-family:Space Grotesk,sans-serif;border-bottom:1px solid {bdr};'
-                f'word-break:break-word;white-space:normal;vertical-align:top;'
-                f'max-width:200px">{v}</td>'
-                for v in row.values()
-            )
-            rows_html += (
-                f'<tr style="background:{bg_row}" '
-                f'onmouseover="this.style.background=\'{row_hov}\'" '
-                f'onmouseout="this.style.background=\'{bg_row}\'">{tds}</tr>'
-            )
-
-        return f"""
-        <div style="overflow:visible;width:100%">
-        <table style="width:100%;border-collapse:collapse;table-layout:fixed;
-                      background:{bg};border-radius:0 0 12px 12px;overflow:hidden">
-          <colgroup>{"<col>" * len(cols)}</colgroup>
-          <thead><tr>{ths}</tr></thead>
-          <tbody>{rows_html}</tbody>
-        </table>
+        return f"""{style}<div style="overflow:visible;width:100%">
+        <table class="t{uid}"><thead><tr>{ths}</tr></thead><tbody>{rows_html}</tbody></table>
         </div>"""
 
     # ---- SEARCH ----
@@ -787,7 +782,12 @@ if st.session_state.active_sheet_url:
 
     if npsn_input:
         base_npsn = str(npsn_input).strip().split("_")[0]
-        hasil = data[st.session_state.npsn_series.str.startswith(base_npsn)]
+        # Cache hasil search — hanya recompute kalau query atau token berubah
+        search_key = (base_npsn, st.session_state.refresh_token)
+        if st.session_state.get("last_search_key") != search_key:
+            st.session_state.last_search_key    = search_key
+            st.session_state.last_search_result = data[st.session_state.npsn_series.str.startswith(base_npsn)]
+        hasil = st.session_state.last_search_result
 
         if len(hasil) > 0:
             # === TOAST pojok kanan ===
@@ -816,11 +816,19 @@ if st.session_state.active_sheet_url:
             hasil = hasil.copy()
             hasil["group"] = hasil["npsn"].astype(str).str.split("_").str[0]
 
+            if "html_cache" not in st.session_state:
+                st.session_state.html_cache = {}
+
             for grp, df_grp in hasil.groupby("group"):
                 sheets_info = " · ".join(df_grp["source_sheet"].unique())
                 df_display  = df_grp.drop(columns=["group"]).reset_index(drop=True)
 
-                # Header card
+                # Cache HTML tabel per grup+dark+token — skip rebuild kalau sama
+                html_key = (grp, DM, st.session_state.refresh_token)
+                if html_key not in st.session_state.html_cache:
+                    st.session_state.html_cache[html_key] = df_to_html(df_display, DM)
+                tbl_html = st.session_state.html_cache[html_key]
+
                 st.markdown(f"""
                 <div class="result-wrap">
                     <div class="result-hdr">
@@ -828,7 +836,7 @@ if st.session_state.active_sheet_url:
                         <span class="result-badge">{len(df_grp)} instalasi</span>
                         <span class="result-sheet-info">📄 {sheets_info}</span>
                     </div>
-                    {df_to_html(df_display, DM)}
+                    {tbl_html}
                 </div>""", unsafe_allow_html=True)
 
         else:
