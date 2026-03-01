@@ -53,13 +53,10 @@ T = {
 # ─────────────────────────────────────────
 # CSS
 # ─────────────────────────────────────────
-st.markdown("""
+st.markdown(f"""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
 <style>
 *{{box-sizing:border-box}}
 body,.stApp{{background:{T['bg']};font-family:'Space Grotesk',sans-serif;color:{T['text']}}}
@@ -229,7 +226,7 @@ def make_table(df, dark):
         for c in cols
     )
 
-    records = df.fillna("").astype(str).to_dict("records")
+    records = df.astype(str).replace("nan", "").to_dict("records")
     rows = []
     for i, r in enumerate(records):
         bg_row = bg if i % 2 == 0 else row_alt
