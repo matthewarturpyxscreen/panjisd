@@ -198,7 +198,16 @@ def fetch_and_parse(clean_url, token):
             r = fut.result()
             if r is not None:
                 results.append(r)
-    return pd.concat(results, ignore_index=True) if results else pd.DataFrame()
+    if not results:
+        return pd.DataFrame()
+    data = pd.concat(results, ignore_index=True)
+    # Hemat RAM 50-80% untuk data besar
+    for col in data.select_dtypes(include="object").columns:
+        try:
+            data[col] = data[col].astype("category")
+        except Exception:
+            pass
+    return data
 
 
 def make_table(df, dark):
@@ -319,7 +328,13 @@ if st.session_state.active_url:
             data = fetch_and_parse(clean, token)
         st.session_state.cached_data    = data
         st.session_state.cached_token   = token
-        st.session_state.npsn_index     = data["npsn"].astype(str).str.strip()
+        # Build O(1) dict index
+        npsn_series = data["npsn"].astype(str).str.strip()
+        idx_map = {}
+        for i, val in enumerate(npsn_series):
+            base_k = val.split("_")[0]
+            idx_map.setdefault(base_k, []).append(i)
+        st.session_state.npsn_index = idx_map
         st.session_state.load_time      = datetime.now().strftime("%H:%M:%S")
         st.session_state.html_cache     = {}
     else:
@@ -365,8 +380,9 @@ if st.session_state.active_url:
         skey = (base, token)
 
         if st.session_state.last_search_key != skey:
-            idx = st.session_state.npsn_index
-            st.session_state.last_search_result = data[idx.str.startswith(base)]
+            idx_map = st.session_state.npsn_index
+            rows    = idx_map.get(base, [])
+            st.session_state.last_search_result = data.iloc[rows] if rows else data.iloc[[]]
             st.session_state.last_search_key     = skey
 
         hasil = st.session_state.last_search_result
