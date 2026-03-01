@@ -9,6 +9,13 @@ import json
 
 st.set_page_config(page_title="Portal Data Sekolah", layout="wide")
 
+# Preload fonts — jauh lebih cepat dari @import
+st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+""", unsafe_allow_html=True)
+
 # =========================================
 # SESSION INIT
 # =========================================
@@ -58,7 +65,7 @@ T = {
 # =========================================
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* fonts loaded via <link> preconnect di bawah */
 *,*::before,*::after{{box-sizing:border-box}}
 .stApp{{background:{T['bg']};font-family:'Space Grotesk',sans-serif;color:{T['text']}}}
 ::-webkit-scrollbar{{width:5px;height:5px}}
@@ -545,7 +552,12 @@ with st.sidebar:
             ⧉ Floating aktif &mdash; {len(q)} video dalam antrian
         </div>""", unsafe_allow_html=True)
     else:
-        components.html(build_yt_player(q, idx, dark=DM, floating=False), height=460, scrolling=False)
+        # Cache HTML player — hanya rebuild saat queue/idx/dark berubah
+        yt_key = (tuple(q), idx, DM)
+        if st.session_state.get("yt_html_key") != yt_key:
+            st.session_state.yt_html_cache = build_yt_player(q, idx, dark=DM, floating=False)
+            st.session_state.yt_html_key   = yt_key
+        components.html(st.session_state.yt_html_cache, height=460, scrolling=False)
 
     st.markdown(f"<hr style='border-top:1px solid {T['border']};margin:12px 0'>", unsafe_allow_html=True)
 
@@ -554,11 +566,12 @@ with st.sidebar:
 # FLOATING PLAYER
 # =========================================
 if st.session_state.yt_float and st.session_state.yt_queue:
-    components.html(
-        build_yt_player(st.session_state.yt_queue, st.session_state.yt_current,
-                        dark=True, floating=True),
-        height=460, scrolling=False
-    )
+    yt_float_key = (tuple(st.session_state.yt_queue), st.session_state.yt_current, True)
+    if st.session_state.get("yt_float_html_key") != yt_float_key:
+        st.session_state.yt_float_html_cache = build_yt_player(
+            st.session_state.yt_queue, st.session_state.yt_current, dark=True, floating=True)
+        st.session_state.yt_float_html_key = yt_float_key
+    components.html(st.session_state.yt_float_html_cache, height=460, scrolling=False)
 
 
 # =========================================
@@ -736,16 +749,17 @@ if st.session_state.active_sheet_url:
             for c in cols
         )
 
-        # build rows
+        # build rows — pakai to_dict jauh lebih cepat dari iterrows
+        records = df.fillna("").astype(str).to_dict("records")
         rows_html = ""
-        for i, (_, row) in enumerate(df.iterrows()):
+        for i, row in enumerate(records):
             bg_row = bg if i % 2 == 0 else row_alt
             tds = "".join(
                 f'<td style="padding:8px 11px;color:{txt};font-size:12px;'
                 f'font-family:Space Grotesk,sans-serif;border-bottom:1px solid {bdr};'
                 f'word-break:break-word;white-space:normal;vertical-align:top;'
-                f'max-width:200px">{str(v) if pd.notna(v) else ""}</td>'
-                for v in row
+                f'max-width:200px">{v}</td>'
+                for v in row.values()
             )
             rows_html += (
                 f'<tr style="background:{bg_row}" '
