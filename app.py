@@ -229,7 +229,7 @@ def make_table(df, dark):
         for c in cols
     )
 
-    records = df.fillna("").astype(str).to_dict("records")
+    records = df.astype(str).replace("nan", "").to_dict("records")
     rows = []
     for i, r in enumerate(records):
         bg_row = bg if i % 2 == 0 else row_alt
