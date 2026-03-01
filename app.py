@@ -587,9 +587,10 @@ with st.form("sheet_form"):
     load_button = st.form_submit_button("▶  Load / Refresh Data")
 
 if load_button and sheet_url_input:
-    st.session_state.refresh_token     = str(uuid.uuid4())
-    st.session_state.active_sheet_url  = sheet_url_input
-    st.session_state.last_refresh_time = time.time()
+    st.session_state.refresh_token    = str(uuid.uuid4())
+    st.session_state.active_sheet_url = sheet_url_input
+    st.session_state.pop("cached_data", None)  # paksa fetch ulang
+    st.session_state.pop("cached_url", None)
 
 
 def build_clean_export_url(url):
@@ -638,36 +639,38 @@ def load_all_sheets(clean_url, refresh_token):
 # =========================================
 # LOAD DATA + AUTO REFRESH
 # =========================================
-REFRESH_INTERVAL = 300
-
 if st.session_state.active_sheet_url:
     clean_url = build_clean_export_url(st.session_state.active_sheet_url)
-    elapsed   = time.time() - st.session_state.last_refresh_time
+    cur_token = st.session_state.refresh_token
 
-    if elapsed >= REFRESH_INTERVAL:
-        st.session_state.refresh_token     = str(uuid.uuid4())
-        st.session_state.last_refresh_time = time.time()
-        elapsed = 0
+    # Data hanya di-fetch saat tombol Load ditekan (token/URL berubah)
+    if (st.session_state.get("cached_token") != cur_token
+            or "cached_data" not in st.session_state
+            or st.session_state.get("cached_url") != clean_url):
+        with st.spinner("⏳ Memuat data dari spreadsheet..."):
+            raw_data = load_all_sheets(clean_url, cur_token)
+        st.session_state.cached_data    = raw_data
+        st.session_state.cached_token   = cur_token
+        st.session_state.cached_url     = clean_url
+        st.session_state.stat_rows      = len(raw_data)
+        st.session_state.stat_sekolah   = raw_data["npsn"].astype(str).str.split("_").str[0].nunique()
+        st.session_state.stat_sheets    = raw_data["source_sheet"].nunique()
+        st.session_state.npsn_series    = raw_data["npsn"].astype(str).str.strip()
 
-    data = load_all_sheets(clean_url, st.session_state.refresh_token)
+    data          = st.session_state.cached_data
+    total_rows    = st.session_state.stat_rows
+    total_sekolah = st.session_state.stat_sekolah
+    total_sheets  = st.session_state.stat_sheets
 
     now_str = datetime.now().strftime("%H:%M:%S")
-    sisa    = max(0, int(REFRESH_INTERVAL - elapsed))
-    pct     = int((elapsed / REFRESH_INTERVAL) * 100)
 
     st.markdown(f"""
     <div class="sync-bar">
         <span class="sync-dot"></span>
-        <span>LIVE — Sinkronisasi: <b>{now_str}</b></span>
+        <span>DATA AKTIF — Dimuat: <b>{now_str}</b></span>
         &nbsp;|&nbsp;
-        <span>Refresh: <b>{sisa//60:02d}:{sisa%60:02d}</b></span>
-        &nbsp;|&nbsp;
-        <span style="color:{T['accent']};font-weight:700">{pct}%</span>
+        <span style="color:{T['text3']};font-size:10px">Update: tekan Load / Refresh Data</span>
     </div>""", unsafe_allow_html=True)
-
-    total_rows    = len(data)
-    total_sekolah = data["npsn"].astype(str).str.split("_").str[0].nunique()
-    total_sheets  = data["source_sheet"].nunique()
 
     st.markdown(f"""
     <div class="stat-row">
@@ -752,7 +755,7 @@ if st.session_state.active_sheet_url:
 
     if npsn_input:
         base_npsn = str(npsn_input).strip().split("_")[0]
-        hasil = data[data["npsn"].astype(str).str.strip().str.startswith(base_npsn)]
+        hasil = data[st.session_state.npsn_series.str.startswith(base_npsn)]
 
         if len(hasil) > 0:
             # === TOAST pojok kanan ===
@@ -805,9 +808,7 @@ if st.session_state.active_sheet_url:
                 Periksa kembali nomor NPSN yang dimasukkan.</p>
             </div>""", unsafe_allow_html=True)
 
-    # Auto-refresh hanya saat interval sudah habis
-    if elapsed >= REFRESH_INTERVAL - 1:
-        st.rerun()
+
 
 else:
     st.markdown(f"""
