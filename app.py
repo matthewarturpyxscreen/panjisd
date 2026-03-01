@@ -603,10 +603,23 @@ def build_clean_export_url(url):
         return url
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=3600, show_spinner=False)
 def load_all_sheets(clean_url, refresh_token):
-    excel = pd.ExcelFile(clean_url)
-    semua_data = []
+    """
+    Download sekali sebagai bytes, lalu parse semua sheet dari memory —
+    jauh lebih cepat daripada ExcelFile(url) yang stream ulang tiap sheet.
+    """
+    import io
+    import requests
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    # 1. Download file SEKALI ke memory
+    resp = requests.get(clean_url, timeout=30)
+    resp.raise_for_status()
+    excel_bytes = io.BytesIO(resp.content)
+
+    excel = pd.ExcelFile(excel_bytes, engine="openpyxl")
+    sheets = excel.sheet_names
 
     def auto_read(sheet_name):
         raw = pd.read_excel(excel, sheet_name=sheet_name, header=None)
@@ -629,10 +642,15 @@ def load_all_sheets(clean_url, refresh_token):
         df["source_sheet"] = sheet_name
         return df.reset_index(drop=True)
 
-    for sheet in excel.sheet_names:
-        h = auto_read(sheet)
-        if h is not None:
-            semua_data.append(h)
+    # 2. Parse semua sheet secara paralel
+    semua_data = []
+    with ThreadPoolExecutor(max_workers=min(8, len(sheets))) as ex:
+        futures = {ex.submit(auto_read, s): s for s in sheets}
+        for fut in as_completed(futures):
+            result = fut.result()
+            if result is not None:
+                semua_data.append(result)
+
     return pd.concat(semua_data, ignore_index=True) if semua_data else pd.DataFrame()
 
 
